@@ -50,13 +50,10 @@ graphComp.layers.add(xvaluesComp);
 graphComp.layers.add(yvaluesComp);
 
 // Function to create a shape layer with a line
-function createLine(comp, startPoint, endPoint, lineName) {
-    if (comp === undefined) {
-        comp = linesComp;
-    }
+function createLine(startPoint, endPoint, lineName) {
     var start = [startPoint[0] - width/2, startPoint[1] - height/2];
     var end = [endPoint[0] - width/2, endPoint[1] - height/2];
-    var shapeLayer = comp.layers.addShape();
+    var shapeLayer = graphComp.layers.addShape();
     shapeLayer.name = lineName;
     var shapeGroup = shapeLayer.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
     var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
@@ -97,6 +94,48 @@ function createDottedLine(startPoint, endPoint, lineName, dashLength, gapLength)
     dash.setValue(dashLength); // Dash length
     var gap = dashGroup.addProperty("ADBE Vector Stroke Gap 1");
     gap.setValue(gapLength); // Gap length
+}
+
+
+//set the stroke not to affected the thickness by zooming
+function keepStrokeWidthConstant() {
+    var layers = linesComp.layers;
+
+    // Add a Slider Control to the "Main" composition for stroke width
+    var scaleController = graphComp.layer("Scale Control");
+    var sliderControl = scaleController.property("Effects").addProperty("ADBE Slider Control");
+    sliderControl.name = "Stroke Width Control";
+    sliderControl.property("Slider").setValue(5); // Default stroke width, adjust as needed
+
+    var scaleExpression = 
+    'targetScale = comp("graph").layer("Scale Control").transform.scale[0] / 100;\n' + 
+    'initialStrokeWidth = comp("graph").layer("Scale Control").effect("Stroke Width Control")("Slider");\n' +
+    'initialStrokeWidth / targetScale;';
+
+    for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        if (layer.property("Contents")) {
+            var contents = layer.property("Contents");
+
+            for (var j = 1; j <= contents.numProperties; j++) {
+                var shapeGroup = contents.property(j);
+
+                if (shapeGroup.property("Contents")) {
+                    var shapeContents = shapeGroup.property("Contents");
+
+                    for (var k = 1; k <= shapeContents.numProperties; k++) {
+                        var shapeElement = shapeContents.property(k);
+
+                        if (shapeElement.matchName == "ADBE Vector Graphic - Stroke") {
+                            var strokeWidth = shapeElement.property("ADBE Vector Stroke Width");
+                            strokeWidth.expression = scaleExpression;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 function createXText(position, textContent, textName) {
@@ -211,10 +250,10 @@ var compWidth = linesComp.width;
 var compHeight = linesComp.height;
 
 // Create left vertical line
-createLine(graphComp, [margin, margin], [margin, compHeight - margin], "Left Vertical Line");
+createLine([margin, margin], [margin, compHeight - margin], "Left Vertical Line");
 
 // Create bottom horizontal line
-createLine(graphComp, [margin, compHeight - margin], [compWidth - margin, compHeight - margin], "Bottom Horizontal Line");
+createLine([margin, compHeight - margin], [compWidth - margin, compHeight - margin], "Bottom Horizontal Line");
 
 // Create three horizontal lines spread through
 for (var i = 1; i <= numberOfMiddleLines; i++) {
@@ -241,3 +280,5 @@ zoomCompositionWithNull(graphComp, [100, 100], [200, 200], 1, 2); // Zoom from 1
 
 zoomXvalues();
 zoomYvalues();
+
+keepStrokeWidthConstant();
