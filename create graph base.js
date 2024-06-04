@@ -39,9 +39,13 @@ var yValues = ["0", "20", "40", "60", "80", "100"];
  * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
  */
 
+
 // Create a new composition
-var linesComp = app.project.items.addComp("lines", 1920, 1080, 1, 10, 30);
-var valueComp = app.project.items.addComp("values", 1920, 1080, 1, 10, 30);
+var graphComp = app.project.items.addComp("graph", width, height, 1, 10, 30);
+var linesComp = app.project.items.addComp('lines', width, height, 1, 10, 30);
+var valuesComp = app.project.items.addComp('values', width, height, 1, 10, 30);
+graphComp.layers.add(linesComp);
+graphComp.layers.add(valuesComp);
 
 // Function to create a shape layer with a line
 function createLine(startPoint, endPoint, lineName) {
@@ -91,7 +95,7 @@ function createDottedLine(startPoint, endPoint, lineName, dashLength, gapLength)
 }
 
 function createText(position, textContent, textName, justification) {
-    var textLayer = valueComp.layers.addText(textContent);
+    var textLayer = valuesComp.layers.addText(textContent);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
 
@@ -102,6 +106,14 @@ function createText(position, textContent, textName, justification) {
     var textDocument = textLayer.property("Source Text").value;
     textDocument.justification = justification;
     textLayer.property("Source Text").setValue(textDocument);
+
+    // // Calculate the x distance from the center of the composition to the text
+    // var compCenterX = linesComp.width / 2;
+    // var textX = position[0];
+    // var distanceFromCenter = textX - compCenterX;
+
+    // // Store the distance in the text layer's comment so it can be accessed later
+    textLayer.comment = position[0].toString();
 }
 
 
@@ -131,6 +143,26 @@ function zoomCompositionWithNull(comp, startScale, endScale, startTime, endTime)
 
     // Apply the zoom effect to the null layer
     zoomLayer(nullLayer, startScale, endScale, startTime, endTime);
+    
+}
+
+function zoomXvalues(comp) {
+    // Add expression to each text layer
+    for (var i = 1; i <= comp.numLayers; i++) {
+        var layer = comp.layer(i);
+
+        var initialPosX = parseFloat(layer.comment);
+
+        // Add expression to the Position property
+        layer.property("Position").expression =
+        'var scaleControlLayer = comp("graph").layer("Scale Control");\n'+
+        'var endScaleValue = scaleControlLayer.scale[0];\n'+
+        'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
+        'var anchorValue = scaleControlLayer.anchorPoint[0] + '+width/2+';\n'+
+        'var moveDistance = ('+initialPosX+' - anchorValue) * scaleFactor;\n'+
+        'value = [moveDistance + anchorValue, thisLayer.position[1]];';
+
+    }
 }
 
 
@@ -165,4 +197,6 @@ for (var i = 1; i <= yValues.length; i++) {
 }
 
 // Apply zoom animation to linesComp
-zoomComposition(linesComp, [100, 100], [200, 200], 1, 2); // Zoom from 100% to 200% from 1s to 2s
+zoomCompositionWithNull(graphComp, [100, 100], [200, 200], 1, 2); // Zoom from 100% to 200% from 1s to 2s
+
+zoomXvalues(valuesComp);
