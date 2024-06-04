@@ -40,13 +40,14 @@ var yValues = ["0", "20", "40", "60", "80", "100"];
  */
 
 // Create a new composition
-var comp = app.project.items.addComp("Graph Base Lines", 1920, 1080, 1, 10, 30);
+var linesComp = app.project.items.addComp("lines", 1920, 1080, 1, 10, 30);
+var valueComp = app.project.items.addComp("values", 1920, 1080, 1, 10, 30);
 
 // Function to create a shape layer with a line
 function createLine(startPoint, endPoint, lineName) {
     var start = [startPoint[0] - width/2, startPoint[1] - height/2];
     var end = [endPoint[0] - width/2, endPoint[1] - height/2];
-    var shapeLayer = comp.layers.addShape();
+    var shapeLayer = linesComp.layers.addShape();
     shapeLayer.name = lineName;
     var shapeGroup = shapeLayer.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
     var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
@@ -70,7 +71,7 @@ function createDottedLine(startPoint, endPoint, lineName, dashLength, gapLength)
     var start = [startPoint[0] - width/2, startPoint[1] - height/2];
     var end = [endPoint[0] - width/2, endPoint[1] - height/2];
     
-    var shapeLayer = comp.layers.addShape();
+    var shapeLayer = linesComp.layers.addShape();
     shapeLayer.name = lineName;
     var shapeGroup = shapeLayer.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
     var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
@@ -90,7 +91,7 @@ function createDottedLine(startPoint, endPoint, lineName, dashLength, gapLength)
 }
 
 function createText(position, textContent, textName, justification) {
-    var textLayer = comp.layers.addText(textContent);
+    var textLayer = valueComp.layers.addText(textContent);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
 
@@ -104,9 +105,38 @@ function createText(position, textContent, textName, justification) {
 }
 
 
+function zoomLayer(layer, startScale, endScale, startTime, endTime) {
+    var scale = layer.property("Scale");
+
+    // Add start keyframe
+    var startKeyframe = scale.addKey(startTime);
+    scale.setValueAtKey(startKeyframe, startScale);
+
+    // Add end keyframe
+    var endKeyframe = scale.addKey(endTime);
+    scale.setValueAtKey(endKeyframe, endScale);
+}
+
+// function zoomComposition(comp, startScale, endScale, startTime, endTime) {
+//     for (var i = 1; i <= comp.numLayers; i++) {
+//         var layer = comp.layer(i);
+//         zoomLayer(layer, startScale, endScale, startTime, endTime);
+//     }
+// }
+
+function zoomCompositionWithNull(comp, startScale, endScale, startTime, endTime) {
+    // Create a null layer
+    var nullLayer = comp.layers.addNull();
+    nullLayer.name = "Scale Control";
+
+    // Apply the zoom effect to the null layer
+    zoomLayer(nullLayer, startScale, endScale, startTime, endTime);
+}
+
+
 // Dimensions
-var compWidth = comp.width;
-var compHeight = comp.height;
+var compWidth = linesComp.width;
+var compHeight = linesComp.height;
 
 // Create left vertical line
 createLine([margin, margin], [margin, compHeight - margin], "Left Vertical Line");
@@ -133,3 +163,6 @@ for (var i = 1; i <= yValues.length; i++) {
     var yPos = compHeight - margin - ((i-1) * (compHeight - 2*margin) / yValues.length) - compHeight * 0.01;
     createText([textXPos, yPos], yValues[i-1], yValues[i-1], ParagraphJustification.RIGHT_JUSTIFY);
 }
+
+// Apply zoom animation to linesComp
+zoomComposition(linesComp, [100, 100], [200, 200], 1, 2); // Zoom from 100% to 200% from 1s to 2s
