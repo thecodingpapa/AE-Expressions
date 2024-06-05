@@ -1,8 +1,8 @@
 //screen size 1920 x 1080
 var height = 1080;
 var width = 1920;
-var numberOfMiddleLines = 3;
-var margin = 100;
+var numberOfMiddleLines = 10;
+var margin = 300;
 var strokeWidth = 4;
 var strokeColor = [0, 0, 0]; // Black color
 
