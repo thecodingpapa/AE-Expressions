@@ -244,6 +244,35 @@ function zoomYvalues() {
     }
 }
 
+// function xValuesFadeOutWheninMarginArea() {
+
+
+//     // Add expression to each text layer
+//     for (var i = 1; i <= xvaluesComp.numLayers; i++) {
+//         var layer = xvaluesComp.layer(i);
+
+//         var initialPosX = parseFloat(layer.comment.split("##")[0]);
+
+//         // Add expression to the Opacity property
+//         layer.property("Opacity").expression =
+//         'var scaleControlLayer = comp("graph").layer("Scale Control");\n'+
+//         'var endScaleValue = scaleControlLayer.scale[0];\n'+
+//         'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
+//         'var anchorValue = scaleControlLayer.anchorPoint[0] + '+width/2+';\n'+
+//         'var moveDistance = ('+initialPosX+' - anchorValue) * scaleFactor;\n'+
+//         'var xPosition = moveDistance + anchorValue;\n'+
+//         'if (xPosition < '+margin+' ) {\n'+
+//         '   value = (1-('+(margin)+'-xPosition)/'+margin+')*100;\n'+
+//         '} else if ( xPosition > '+(width - margin*1.1)+') {\n'+
+//         '   value = (1-(xPosition - '+(width - margin*1.1)+')/'+margin+')*100;\n'+
+//         '} else {\n'+
+//         '   value = 100;\n'+
+//         '}';
+
+//     }
+
+// }
+
 
 // Dimensions
 var compWidth = linesComp.width;
@@ -280,5 +309,5 @@ zoomCompositionWithNull(graphComp, [100, 100], [200, 200], 1, 2); // Zoom from 1
 
 zoomXvalues();
 zoomYvalues();
-
+// xValuesFadeOutWhenOutOfGraphArea();
 keepStrokeWidthConstant();
