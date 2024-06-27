@@ -39,9 +39,19 @@ var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
  * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
  */
 
+// get timestamp of datetime
+function getTimestamp() {
+    var date = new Date();
+    var timestamp = date.getTime();
+    return timestamp;
+}
+
+//create graph name with timestamp
+var graphName = "graph_" + getTimestamp();
+
 
 // Create a new composition
-var graphComp = app.project.items.addComp("graph", width, height, 1, 10, 30);
+var graphComp = app.project.items.addComp(graphName, width, height, 1, 10, 30);
 var linesComp = app.project.items.addComp('lines', width, height, 1, 10, 30);
 var xvaluesComp = app.project.items.addComp('xvalues', width, height, 1, 10, 30);
 var yvaluesComp = app.project.items.addComp('yvalues', width, height, 1, 10, 30);
@@ -108,8 +118,8 @@ function keepStrokeWidthConstant() {
     sliderControl.property("Slider").setValue(5); // Default stroke width, adjust as needed
 
     var scaleExpression = 
-    'targetScale = comp("graph").layer("Scale Control").transform.scale[0] / 100;\n' + 
-    'initialStrokeWidth = comp("graph").layer("Scale Control").effect("Stroke Width Control")("Slider");\n' +
+    'targetScale = comp('+graphName+').layer("Scale Control").transform.scale[0] / 100;\n' + 
+    'initialStrokeWidth = comp('+graphName+').layer("Scale Control").effect("Stroke Width Control")("Slider");\n' +
     'initialStrokeWidth / targetScale;';
 
     for (var i = 1; i <= layers.length; i++) {
@@ -214,7 +224,7 @@ function zoomXvalues() {
 
         // Add expression to the Position property
         layer.property("Position").expression =
-        'var scaleControlLayer = comp("graph").layer("Scale Control");\n'+
+        'var scaleControlLayer = comp('+graphName+').layer("Scale Control");\n'+
         'var endScaleValue = scaleControlLayer.scale[0];\n'+
         'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
         'var anchorValue = scaleControlLayer.anchorPoint[0] + '+width/2+';\n'+
@@ -234,7 +244,7 @@ function zoomYvalues() {
 
         // Add expression to the Position property
         layer.property("Position").expression =
-        'var scaleControlLayer = comp("graph").layer("Scale Control");\n'+
+        'var scaleControlLayer = comp('+graphName+').layer("Scale Control");\n'+
         'var endScaleValue = scaleControlLayer.scale[1];\n'+
         'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
         'var anchorValue = scaleControlLayer.anchorPoint[1] + '+height/2+';\n'+
@@ -255,7 +265,7 @@ function zoomYvalues() {
 
 //         // Add expression to the Opacity property
 //         layer.property("Opacity").expression =
-//         'var scaleControlLayer = comp("graph").layer("Scale Control");\n'+
+//         'var scaleControlLayer = comp('+graphName+').layer("Scale Control");\n'+
 //         'var endScaleValue = scaleControlLayer.scale[0];\n'+
 //         'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
 //         'var anchorValue = scaleControlLayer.anchorPoint[0] + '+width/2+';\n'+
