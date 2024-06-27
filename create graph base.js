@@ -1,4 +1,4 @@
-var version = "1.0.0";
+var version = "1.1.0";
 
 //screen size 1920 x 1080
 var height = 1080;
@@ -8,7 +8,7 @@ var margin = 300;
 var strokeWidth = 4;
 var strokeColor = [0, 0, 0]; // Black color
 
-var textYPosFromBottomLine = 30;
+var textYPosFromBottomLine = 70;
 var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
 
 var textXPosFromLeftLine = 20;
@@ -150,15 +150,34 @@ function keepStrokeWidthConstant() {
     }
 }
 
+function centerAnchorPoint( layer ){
+    var comp = layer.containingComp;
+    var curTime = comp.time;
+
+    /* find center by bounding box of the layer */
+    var y = layer.sourceRectAtTime(curTime, false).height/2;
+
+    /* we need this for text layer */
+    y += layer.sourceRectAtTime(curTime, false).top;
+
+    //set only y anchor point
+    layer.anchorPoint.setValue([ layer.anchorPoint.value[0], y ]);
+
+    
+};
+
 function createXText(position, textContent, textName) {
     var textLayer = xvaluesComp.layers.addText(textContent);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
 
+    //achor point
+
 
     var textDocument = textLayer.property("Source Text").value;
     textDocument.justification = ParagraphJustification.CENTER_JUSTIFY;
     textLayer.property("Source Text").setValue(textDocument);
+
 
     // // Calculate the x distance from the center of the composition to the text
     // var compCenterX = linesComp.width / 2;
@@ -171,12 +190,14 @@ function createXText(position, textContent, textName) {
 
 function createYText(position, textContent, textName) {
     var textLayer = yvaluesComp.layers.addText(textContent);
+    centerAnchorPoint(textLayer);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
 
     var textDocument = textLayer.property("Source Text").value;
     textDocument.justification = ParagraphJustification.RIGHT_JUSTIFY;
     textLayer.property("Source Text").setValue(textDocument);
+
 
     // // Calculate the x distance from the center of the composition to the text
     // var compCenterX = linesComp.width / 2;
@@ -297,7 +318,7 @@ createLine([margin, margin], [margin, compHeight - margin], "Left Vertical Line"
 createLine([margin, compHeight - margin], [compWidth - margin, compHeight - margin], "Bottom Horizontal Line");
 
 if(numberOfMiddleLines == 0){
-    numberOfMiddleLines = yValues.length - 1;
+    numberOfMiddleLines = yValues.length - 2;
 }
 
 // Create three horizontal lines spread through
@@ -309,14 +330,14 @@ for (var i = 1; i <= numberOfMiddleLines; i++) {
 // Create text layers below the bottom horizontal line
 var textYPos = compHeight - margin + textYPosFromBottomLine; // adjust textHeight as needed
 for (var i = 1; i <= xValues.length; i++) {
-    var xPos = margin + ((i-1) * (compWidth - 2*margin) / xValues.length) + compWidth * 0.01;
+    var xPos = margin + ((i-1) * (compWidth - 2*margin) / (xValues.length - 1));
     createXText([xPos, textYPos], xValues[i-1],  xValues[i-1]);
 }
 
 // Create text layers to the left of the vertical line
 var textXPos = margin - textXPosFromLeftLine; // adjust textXPosFromLeftLine as needed
 for (var i = 1; i <= yValues.length; i++) {
-    var yPos = compHeight - margin - ((i-1) * (compHeight - 2*margin) / yValues.length) - compHeight * 0.01;
+    var yPos = compHeight - margin - ((i-1) * (compHeight - 2*margin) / (yValues.length - 1));
     createYText([textXPos, yPos], yValues[i-1], yValues[i-1]);
 }
 
