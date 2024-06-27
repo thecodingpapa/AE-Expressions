@@ -1,3 +1,5 @@
+var version = "1.0.0";
+
 //screen size 1920 x 1080
 var height = 1080;
 var width = 1920;
@@ -47,7 +49,7 @@ function getTimestamp() {
 }
 
 //create graph name with timestamp
-var graphName = "graph_" + getTimestamp();
+var graphName = "graph_" + getTimestamp() + "(" + version + ")";
 
 
 // Create a new composition
