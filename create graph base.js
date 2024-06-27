@@ -1,7 +1,7 @@
 //screen size 1920 x 1080
 var height = 1080;
 var width = 1920;
-var numberOfMiddleLines = 10;
+var numberOfMiddleLines = 0;// if you want to add custom number of horizontal lines, change this value(0 means number of y values - 1)
 var margin = 300;
 var strokeWidth = 4;
 var strokeColor = [0, 0, 0]; // Black color
@@ -293,6 +293,10 @@ createLine([margin, margin], [margin, compHeight - margin], "Left Vertical Line"
 
 // Create bottom horizontal line
 createLine([margin, compHeight - margin], [compWidth - margin, compHeight - margin], "Bottom Horizontal Line");
+
+if(numberOfMiddleLines == 0){
+    numberOfMiddleLines = yValues.length - 1;
+}
 
 // Create three horizontal lines spread through
 for (var i = 1; i <= numberOfMiddleLines; i++) {
