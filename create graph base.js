@@ -1,4 +1,4 @@
-var version = "1.1.0";
+var version = "1.2.0";
 
 //screen size 1920 x 1080
 var height = 1080;
@@ -156,27 +156,30 @@ function centerAnchorPoint( layer ){
 
     /* find center by bounding box of the layer */
     var y = layer.sourceRectAtTime(curTime, false).height/2;
+    var x = layer.sourceRectAtTime(curTime, false).width/2;
 
     /* we need this for text layer */
     y += layer.sourceRectAtTime(curTime, false).top;
+    x += layer.sourceRectAtTime(curTime, false).left;
 
     //set only y anchor point
-    layer.anchorPoint.setValue([ layer.anchorPoint.value[0], y ]);
+    layer.anchorPoint.setValue([ x, y ]);
 
     
 };
 
 function createXText(position, textContent, textName) {
     var textLayer = xvaluesComp.layers.addText(textContent);
+    centerAnchorPoint(textLayer);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
 
     //achor point
 
 
-    var textDocument = textLayer.property("Source Text").value;
-    textDocument.justification = ParagraphJustification.CENTER_JUSTIFY;
-    textLayer.property("Source Text").setValue(textDocument);
+    // var textDocument = textLayer.property("Source Text").value;
+    // textDocument.justification = ParagraphJustification.CENTER_JUSTIFY;
+    // textLayer.property("Source Text").setValue(textDocument);
 
 
     // // Calculate the x distance from the center of the composition to the text
@@ -194,9 +197,9 @@ function createYText(position, textContent, textName) {
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
 
-    var textDocument = textLayer.property("Source Text").value;
-    textDocument.justification = ParagraphJustification.RIGHT_JUSTIFY;
-    textLayer.property("Source Text").setValue(textDocument);
+    // var textDocument = textLayer.property("Source Text").value;
+    // textDocument.justification = ParagraphJustification.RIGHT_JUSTIFY;
+    // textLayer.property("Source Text").setValue(textDocument);
 
 
     // // Calculate the x distance from the center of the composition to the text
@@ -277,6 +280,39 @@ function zoomYvalues() {
     }
 }
 
+function zoomLines() {
+    var layers = linesComp.layers;
+    for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+        
+        layer.property("Scale").expression =
+        'var scaleControlLayer = comp("'+graphName+'").layer("Scale Control");\n'+
+        'var endScaleValue = scaleControlLayer.scale;\n'+
+        'value = endScaleValue;'
+    }
+
+
+    for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        var initialPos = layer.property("Position").value;
+
+        layer.property("Position").expression =
+        'var scaleControlLayer = comp("'+graphName+'").layer("Scale Control");\n'+
+        'var endScaleValue = scaleControlLayer.scale;\n'+
+        'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
+        'var anchorValueX = scaleControlLayer.anchorPoint[0] + '+width/2+';\n'+
+        'var anchorValueY = scaleControlLayer.anchorPoint[1] + '+height/2+';\n'+
+        'var anchorValue = ['+initialPos[0]+' - anchorValueX, '+initialPos[1]+' - anchorValueY];\n'+
+        'var moveDistance = [anchorValue[0]*scaleFactor[0], anchorValue[1]*scaleFactor[1]];\n'+
+        'value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];';
+
+
+        // 'var moveDistance = (-1*anchorValue) * scaleFactor;\n'+
+        // 'value = thisLayer.position + moveDistance;';
+        // 'value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];';
+    }
+}
 // function xValuesFadeOutWheninMarginArea() {
 
 
@@ -344,6 +380,7 @@ for (var i = 1; i <= yValues.length; i++) {
 // Apply zoom animation to linesComp
 zoomCompositionWithNull(graphComp, [100, 100], [200, 200], 1, 2); // Zoom from 100% to 200% from 1s to 2s
 
+zoomLines();
 zoomXvalues();
 zoomYvalues();
 // xValuesFadeOutWhenOutOfGraphArea();
