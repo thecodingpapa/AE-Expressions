@@ -1,4 +1,4 @@
-var version = "1.3.0";
+var version = "1.4.0";
 
 //screen size 1920 x 1080
 var height = 1080;
