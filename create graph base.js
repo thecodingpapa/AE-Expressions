@@ -1,4 +1,4 @@
-var version = "1.2.0";
+var version = "1.3.0";
 
 //screen size 1920 x 1080
 var height = 1080;
@@ -8,12 +8,17 @@ var margin = 300;
 var strokeWidth = 4;
 var strokeColor = [0, 0, 0]; // Black color
 
-var textYPosFromBottomLine = 70;
+var textYPosFromBottomLine = 50;
 var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
 
-var textXPosFromLeftLine = 20;
+var textXPosFromLeftLine = 70;
 var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"];
 
+var numOfGraphs = 3;
+var graphWidth = 10;
+var graphColor = [25, 25, 25];
+
+// var yValues = {'start': 0, 'end': 100, 'step': 10};
 
 
 
@@ -49,23 +54,78 @@ function getTimestamp() {
 }
 
 //create graph name with timestamp
-var graphName = "graph_" + getTimestamp() + "(" + version + ")";
+var graphName = "graph_anim_" + getTimestamp() + "(" + version + ")";
+var linesName = 'lines' + '(' + version + ')';
+var xvaluesName = 'xvalues' + '(' + version + ')';
+var yvaluesName = 'yvalues' + '(' + version + ')';
+var graphsName = 'graphs' + '(' + version + ')';
 
 
 // Create a new composition
-var graphComp = app.project.items.addComp(graphName, width, height, 1, 10, 30);
-var linesComp = app.project.items.addComp('lines', width, height, 1, 10, 30);
-var xvaluesComp = app.project.items.addComp('xvalues', width, height, 1, 10, 30);
-var yvaluesComp = app.project.items.addComp('yvalues', width, height, 1, 10, 30);
-graphComp.layers.add(linesComp);
-graphComp.layers.add(xvaluesComp);
-graphComp.layers.add(yvaluesComp);
+var graphAnimComp = app.project.items.addComp(graphName, width, height, 1, 10, 30);
+var linesComp = app.project.items.addComp(linesName, width, height, 1, 10, 30);
+var xvaluesComp = app.project.items.addComp(xvaluesName, width, height, 1, 10, 30);
+var yvaluesComp = app.project.items.addComp(yvaluesName, width, height, 1, 10, 30);
+var graphsComp = app.project.items.addComp(graphsName, width, height, 1, 10, 30);
+graphAnimComp.layers.add(linesComp);
+graphAnimComp.layers.add(xvaluesComp);
+graphAnimComp.layers.add(yvaluesComp);
+graphAnimComp.layers.add(graphsComp);
+
+function createGraphLayers() {
+    var graphBaseName = "Graph_Base";
+
+    for(index = 0; index < numOfGraphs; index++){
+        var shapeLayer = graphsComp.layers.addShape();
+        shapeLayer.name = graphBaseName + "_" + (index + 1);
+        //make Path in Shape in Contents in Shape Layer
+        var shapeGroup = shapeLayer.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
+        var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
+        shapeGroupContents.addProperty("ADBE Vector Shape - Group");
+        var stroke = shapeGroupContents.addProperty("ADBE Vector Graphic - Stroke");
+
+        stroke.property("ADBE Vector Stroke Color").setValue(graphColor); // Black color
+        stroke.property("ADBE Vector Stroke Width").setValue(graphWidth); // Line width
+    }
+
+}
+
+
+function zoomGraphs() {
+    var layers = graphsComp.layers;
+    for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+        
+        layer.property("Scale").expression =
+        'var scaleControlLayer = comp("'+graphName+'").layer("Scale Control");\n'+
+        'var endScaleValue = scaleControlLayer.scale;\n'+
+        'value = endScaleValue;'
+    }
+
+
+    for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        var initialPos = layer.property("Position").value;
+
+        layer.property("Position").expression =
+        'var scaleControlLayer = comp("'+graphName+'").layer("Scale Control");\n'+
+        'var endScaleValue = scaleControlLayer.scale;\n'+
+        'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
+        'var anchorValueX = scaleControlLayer.anchorPoint[0] + '+width/2+';\n'+
+        'var anchorValueY = scaleControlLayer.anchorPoint[1] + '+height/2+';\n'+
+        'var anchorValue = ['+initialPos[0]+' - anchorValueX, '+initialPos[1]+' - anchorValueY];\n'+
+        'var moveDistance = [anchorValue[0]*scaleFactor[0], anchorValue[1]*scaleFactor[1]];\n'+
+        'value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];';
+
+    }
+}
 
 // Function to create a shape layer with a line
 function createLine(startPoint, endPoint, lineName) {
     var start = [startPoint[0] - width/2, startPoint[1] - height/2];
     var end = [endPoint[0] - width/2, endPoint[1] - height/2];
-    var shapeLayer = graphComp.layers.addShape();
+    var shapeLayer = graphAnimComp.layers.addShape();
     shapeLayer.name = lineName;
     var shapeGroup = shapeLayer.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
     var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
@@ -110,14 +170,14 @@ function createDottedLine(startPoint, endPoint, lineName, dashLength, gapLength)
 
 
 //set the stroke not to affected the thickness by zooming
-function keepStrokeWidthConstant() {
-    var layers = linesComp.layers;
+function keepStrokeWidthConstant(layers, constantWidth) {
+
 
     // Add a Slider Control to the "Main" composition for stroke width
-    var scaleController = graphComp.layer("Scale Control");
+    var scaleController = graphAnimComp.layer("Scale Control");
     var sliderControl = scaleController.property("Effects").addProperty("ADBE Slider Control");
     sliderControl.name = "Stroke Width Control";
-    sliderControl.property("Slider").setValue(5); // Default stroke width, adjust as needed
+    sliderControl.property("Slider").setValue(constantWidth); // Default stroke width, adjust as needed
 
     var scaleExpression = 
     'targetScale = comp("'+graphName+'").layer("Scale Control").transform.scale[1] / 100;\n' + 
@@ -140,8 +200,8 @@ function keepStrokeWidthConstant() {
                         var shapeElement = shapeContents.property(k);
 
                         if (shapeElement.matchName == "ADBE Vector Graphic - Stroke") {
-                            var strokeWidth = shapeElement.property("ADBE Vector Stroke Width");
-                            strokeWidth.expression = scaleExpression;
+                            var width = shapeElement.property("ADBE Vector Stroke Width");
+                            width.expression = scaleExpression;
                         }
                     }
                 }
@@ -165,7 +225,6 @@ function centerAnchorPoint( layer ){
     //set only y anchor point
     layer.anchorPoint.setValue([ x, y ]);
 
-    
 };
 
 function createXText(position, textContent, textName) {
@@ -173,19 +232,6 @@ function createXText(position, textContent, textName) {
     centerAnchorPoint(textLayer);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
-
-    //achor point
-
-
-    // var textDocument = textLayer.property("Source Text").value;
-    // textDocument.justification = ParagraphJustification.CENTER_JUSTIFY;
-    // textLayer.property("Source Text").setValue(textDocument);
-
-
-    // // Calculate the x distance from the center of the composition to the text
-    // var compCenterX = linesComp.width / 2;
-    // var textX = position[0];
-    // var distanceFromCenter = textX - compCenterX;
 
     // // Store the distance in the text layer's comment so it can be accessed later
     textLayer.comment = position[0].toString();
@@ -197,16 +243,6 @@ function createYText(position, textContent, textName) {
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
 
-    // var textDocument = textLayer.property("Source Text").value;
-    // textDocument.justification = ParagraphJustification.RIGHT_JUSTIFY;
-    // textLayer.property("Source Text").setValue(textDocument);
-
-
-    // // Calculate the x distance from the center of the composition to the text
-    // var compCenterX = linesComp.width / 2;
-    // var textX = position[0];
-    // var distanceFromCenter = textX - compCenterX;
-
     // // Store the distance in the text layer's comment so it can be accessed later
     textLayer.comment = position[0].toString() + "##" + position[1].toString();
 }
@@ -214,6 +250,7 @@ function createYText(position, textContent, textName) {
 
 function zoomLayer(layer, startScale, endScale, startTime, endTime) {
     var scale = layer.property("Scale");
+
 
     // Add start keyframe
     var startKeyframe = scale.addKey(startTime);
@@ -224,12 +261,6 @@ function zoomLayer(layer, startScale, endScale, startTime, endTime) {
     scale.setValueAtKey(endKeyframe, endScale);
 }
 
-// function zoomComposition(comp, startScale, endScale, startTime, endTime) {
-//     for (var i = 1; i <= comp.numLayers; i++) {
-//         var layer = comp.layer(i);
-//         zoomLayer(layer, startScale, endScale, startTime, endTime);
-//     }
-// }
 
 function zoomCompositionWithNull(comp, startScale, endScale, startTime, endTime) {
     // Create a null layer
@@ -307,40 +338,8 @@ function zoomLines() {
         'var moveDistance = [anchorValue[0]*scaleFactor[0], anchorValue[1]*scaleFactor[1]];\n'+
         'value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];';
 
-
-        // 'var moveDistance = (-1*anchorValue) * scaleFactor;\n'+
-        // 'value = thisLayer.position + moveDistance;';
-        // 'value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];';
     }
 }
-// function xValuesFadeOutWheninMarginArea() {
-
-
-//     // Add expression to each text layer
-//     for (var i = 1; i <= xvaluesComp.numLayers; i++) {
-//         var layer = xvaluesComp.layer(i);
-
-//         var initialPosX = parseFloat(layer.comment.split("##")[0]);
-
-//         // Add expression to the Opacity property
-//         layer.property("Opacity").expression =
-//         'var scaleControlLayer = comp("'+graphName+'").layer("Scale Control");\n'+
-//         'var endScaleValue = scaleControlLayer.scale[0];\n'+
-//         'var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n'+
-//         'var anchorValue = scaleControlLayer.anchorPoint[0] + '+width/2+';\n'+
-//         'var moveDistance = ('+initialPosX+' - anchorValue) * scaleFactor;\n'+
-//         'var xPosition = moveDistance + anchorValue;\n'+
-//         'if (xPosition < '+margin+' ) {\n'+
-//         '   value = (1-('+(margin)+'-xPosition)/'+margin+')*100;\n'+
-//         '} else if ( xPosition > '+(width - margin*1.1)+') {\n'+
-//         '   value = (1-(xPosition - '+(width - margin*1.1)+')/'+margin+')*100;\n'+
-//         '} else {\n'+
-//         '   value = 100;\n'+
-//         '}';
-
-//     }
-
-// }
 
 
 // Dimensions
@@ -377,15 +376,19 @@ for (var i = 1; i <= yValues.length; i++) {
     createYText([textXPos, yPos], yValues[i-1], yValues[i-1]);
 }
 
+createGraphLayers();
+
 // Apply zoom animation to linesComp
-zoomCompositionWithNull(graphComp, [100, 100], [200, 200], 1, 2); // Zoom from 100% to 200% from 1s to 2s
+zoomCompositionWithNull(graphAnimComp, [100, 100], [200, 200], 1, 2); // Zoom from 100% to 200% from 1s to 2s
 
 zoomLines();
+zoomGraphs();
 zoomXvalues();
 zoomYvalues();
 // xValuesFadeOutWhenOutOfGraphArea();
-keepStrokeWidthConstant();
+keepStrokeWidthConstant(linesComp.layers, strokeWidth);
+keepStrokeWidthConstant(graphsComp.layers, graphWidth);
 
 
 // add the graph composition to timeline
-graphComp.openInViewer();
+graphAnimComp.openInViewer();
