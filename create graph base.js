@@ -1,4 +1,4 @@
-var version = "1.4.0";
+var version = "1.4.1";
 
 //screen size 1920 x 1080
 var height = 1080;
@@ -9,10 +9,27 @@ var strokeWidth = 4;
 var strokeColor = [0, 0, 0]; // Black color
 
 var textYPosFromBottomLine = 50;
-var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
+var xValuesSrc = {'start': 2007, 'end': 2024, 'step': 1};
+var yValuesSrc = {'start': -10, 'end': 10, 'step': 2};
+
+// var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
+var xValues = [];
+if(xValues.length == 0){
+    for (var i = xValuesSrc.start; i <= xValuesSrc.end; i += xValuesSrc.step) {
+        xValues.push(i);
+    }
+}
+
+
+// var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"];
+var yValues = [];
+if(yValues.length == 0){
+    for (var i = yValuesSrc.start; i <= yValuesSrc.end; i += yValuesSrc.step) {
+        yValues.push(i);
+    }
+}
 
 var textXPosFromLeftLine = 70;
-var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"];
 
 var numOfGraphs = 3;
 var graphWidth = 10;
