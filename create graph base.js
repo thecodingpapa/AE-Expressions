@@ -248,7 +248,11 @@ function centerAnchorPoint( layer ){
 
 function createXText(position, textContent, textName) {
     var textLayer = xvaluesComp.layers.addText(textContent);
-    textLayer.property("FontSize").setValue(fontSize);
+
+    textProp = textLayer.property("ADBE Text Properties").property("ADBE Text Document"),
+    textDoc = textProp.value;
+    textDoc.fontSize = fontSize;
+    textProp.setValue(textDoc);
 
     centerAnchorPoint(textLayer);
     textLayer.name = textName;
@@ -260,7 +264,11 @@ function createXText(position, textContent, textName) {
 
 function createYText(position, textContent, textName) {
     var textLayer = yvaluesComp.layers.addText(textContent);
-    textLayer.property("FontSize").setValue(fontSize);
+    
+    textProp = textLayer.property("ADBE Text Properties").property("ADBE Text Document"),
+    textDoc = textProp.value;
+    textDoc.fontSize = fontSize;
+    textProp.setValue(textDoc);
 
     centerAnchorPoint(textLayer);
     textLayer.name = textName;
