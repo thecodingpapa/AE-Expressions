@@ -12,6 +12,8 @@ var textYPosFromBottomLine = 50;
 var xValuesSrc = {'start': 2007, 'end': 2024, 'step': 1};
 var yValuesSrc = {'start': -10, 'end': 10, 'step': 2};
 
+var fontSize = 20;
+
 // var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
 var xValues = [];
 if(xValues.length == 0){
@@ -246,6 +248,8 @@ function centerAnchorPoint( layer ){
 
 function createXText(position, textContent, textName) {
     var textLayer = xvaluesComp.layers.addText(textContent);
+    textLayer.property("FontSize").setValue(fontSize);
+
     centerAnchorPoint(textLayer);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
@@ -256,6 +260,8 @@ function createXText(position, textContent, textName) {
 
 function createYText(position, textContent, textName) {
     var textLayer = yvaluesComp.layers.addText(textContent);
+    textLayer.property("FontSize").setValue(fontSize);
+
     centerAnchorPoint(textLayer);
     textLayer.name = textName;
     textLayer.property("Position").setValue(position);
