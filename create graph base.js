@@ -1,18 +1,22 @@
-var version = "1.4.1";
+var version = "1.4.2";
 
 //screen size 1920 x 1080
 var height = 1080;
 var width = 1920;
+var duration = 60;
 var numberOfMiddleLines = 0;// if you want to add custom number of horizontal lines, change this value(0 means number of y values - 1)
 var margin = 300;
 var strokeWidth = 4;
-var strokeColor = [0, 0, 0]; // Black color
+var strokeColor = [0,0,0]; // black color
 
 var textYPosFromBottomLine = 50;
 var xValuesSrc = {'start': 2007, 'end': 2024, 'step': 1};
 var yValuesSrc = {'start': -10, 'end': 10, 'step': 2};
 
 var fontSize = 20;
+var fontColor = [0, 0, 0]; // Black color
+
+
 
 // var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
 var xValues = [];
@@ -35,7 +39,7 @@ var textXPosFromLeftLine = 70;
 
 var numOfGraphs = 3;
 var graphWidth = 10;
-var graphColor = [25, 25, 25];
+var graphColor = [0, 0, 0];
 
 // var yValues = {'start': 0, 'end': 100, 'step': 10};
 
@@ -81,11 +85,11 @@ var graphsName = 'graphs' + '(' + version + ')';
 
 
 // Create a new composition
-var graphAnimComp = app.project.items.addComp(graphName, width, height, 1, 10, 30);
-var linesComp = app.project.items.addComp(linesName, width, height, 1, 10, 30);
-var xvaluesComp = app.project.items.addComp(xvaluesName, width, height, 1, 10, 30);
-var yvaluesComp = app.project.items.addComp(yvaluesName, width, height, 1, 10, 30);
-var graphsComp = app.project.items.addComp(graphsName, width, height, 1, 10, 30);
+var graphAnimComp = app.project.items.addComp(graphName, width, height, 1, duration, 30);
+var linesComp = app.project.items.addComp(linesName, width, height, 1, duration, 30);
+var xvaluesComp = app.project.items.addComp(xvaluesName, width, height, 1, duration, 30);
+var yvaluesComp = app.project.items.addComp(yvaluesName, width, height, 1, duration, 30);
+var graphsComp = app.project.items.addComp(graphsName, width, height, 1, duration, 30);
 graphAnimComp.layers.add(linesComp);
 graphAnimComp.layers.add(xvaluesComp);
 graphAnimComp.layers.add(yvaluesComp);
@@ -97,6 +101,8 @@ function createGraphLayers() {
     for(index = 0; index < numOfGraphs; index++){
         var shapeLayer = graphsComp.layers.addShape();
         shapeLayer.name = graphBaseName + "_" + (index + 1);
+        
+
         //make Path in Shape in Contents in Shape Layer
         var shapeGroup = shapeLayer.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group");
         var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
@@ -252,6 +258,7 @@ function createXText(position, textContent, textName) {
     textProp = textLayer.property("ADBE Text Properties").property("ADBE Text Document"),
     textDoc = textProp.value;
     textDoc.fontSize = fontSize;
+    textDoc.fillColor = fontColor;
     textProp.setValue(textDoc);
 
     centerAnchorPoint(textLayer);
@@ -268,6 +275,7 @@ function createYText(position, textContent, textName) {
     textProp = textLayer.property("ADBE Text Properties").property("ADBE Text Document"),
     textDoc = textProp.value;
     textDoc.fontSize = fontSize;
+    textDoc.fillColor = fontColor;
     textProp.setValue(textDoc);
 
     centerAnchorPoint(textLayer);
