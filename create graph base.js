@@ -10,7 +10,7 @@ var strokeWidth = 4;
 var strokeColor = [0,0,0]; // black color
 
 var textYPosFromBottomLine = 50;
-var xValuesSrc = {'start': 2007, 'end': 2024, 'step': 1};
+var xValuesSrc = {'start': 2007, 'end': 2025, 'step': 1};
 var yValuesSrc = {'start': -10, 'end': 10, 'step': 2};
 
 var fontSize = 20;
