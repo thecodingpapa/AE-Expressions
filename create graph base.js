@@ -7,14 +7,13 @@ var duration = 60;
 var numberOfMiddleLines = 0;// if you want to add custom number of horizontal lines, change this value(0 means number of y values - 1)
 var margin = 300;
 var strokeWidth = 4;
-var strokeColor = [0,0,0]; // black color
 
 var textYPosFromBottomLine = 50;
 var xValuesSrc = {'start': 2007, 'end': 2025, 'step': 1};
-var yValuesSrc = {'start': -10, 'end': 10, 'step': 2};
+var yValuesSrc = {'start': -12, 'end': 12, 'step': 3};
 
 var fontSize = 20;
-var fontColor = [0, 0, 0]; // Black color
+var color = [0, 0, 0]; // Black color
 
 
 
@@ -160,7 +159,7 @@ function createLine(startPoint, endPoint, lineName) {
     myPath.vertices = [start, end];
     path.setValue(myPath);
     var stroke = shapeGroupContents.addProperty("ADBE Vector Graphic - Stroke");
-    stroke.property("ADBE Vector Stroke Color").setValue(strokeColor); // Black color
+    stroke.property("ADBE Vector Stroke Color").setValue(color); // Black color
     stroke.property("ADBE Vector Stroke Width").setValue(strokeWidth); // Line width
 }
 
@@ -184,7 +183,7 @@ function createDottedLine(startPoint, endPoint, lineName, dashLength, gapLength)
     myPath.vertices = [start, end];
     path.setValue(myPath);
     var stroke = shapeGroupContents.addProperty("ADBE Vector Graphic - Stroke");
-    stroke.property("ADBE Vector Stroke Color").setValue(strokeColor); // Black color
+    stroke.property("ADBE Vector Stroke Color").setValue(color); // Black color
     stroke.property("ADBE Vector Stroke Width").setValue(strokeWidth); // Line width
     var dashGroup = stroke.property("ADBE Vector Stroke Dashes");
     var dash = dashGroup.addProperty("ADBE Vector Stroke Dash 1");
@@ -258,7 +257,7 @@ function createXText(position, textContent, textName) {
     textProp = textLayer.property("ADBE Text Properties").property("ADBE Text Document"),
     textDoc = textProp.value;
     textDoc.fontSize = fontSize;
-    textDoc.fillColor = fontColor;
+    textDoc.fillColor = color;
     textProp.setValue(textDoc);
 
     centerAnchorPoint(textLayer);
@@ -275,7 +274,7 @@ function createYText(position, textContent, textName) {
     textProp = textLayer.property("ADBE Text Properties").property("ADBE Text Document"),
     textDoc = textProp.value;
     textDoc.fontSize = fontSize;
-    textDoc.fillColor = fontColor;
+    textDoc.fillColor = color;
     textProp.setValue(textDoc);
 
     centerAnchorPoint(textLayer);
