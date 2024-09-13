@@ -24,7 +24,7 @@
         var minOpacityInput = myPanel.add("edittext", undefined, "10"); // Default to 10% minimum opacity
         minOpacityInput.characters = 5;
 
-        // Button to apply flicker effect
+        // Button to apply flicker effect 
         var flickerButton = myPanel.add("button", undefined, "Flicker Opacity");
 
         // Set up button action

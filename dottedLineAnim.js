@@ -20,10 +20,14 @@ function createDottedLineAnimation() {
     var path = shapeGroup.property("Contents").addProperty("ADBE Vector Shape - Group");
     var pathShape = path.property("Path");
 
+
+
+
     // Define the path as a simple line
     var myShape = new Shape();
     myShape.closed = false;
-    myShape.vertices = [[100, 100], [500, 100]]; // Horizontal line from x=100 to x=500
+    //give position based on 1080p comp size 50% of length
+    myShape.vertices = [[1920 * -0.25, 0], [1920 * 0.25, 0]]; 
     pathShape.setValue(myShape);
 
     // Add a stroke to the shape group
@@ -44,6 +48,23 @@ function createDottedLineAnimation() {
     // Animate the stroke offset to create the moving dotted line effect
     offset.setValueAtTime(0, 0);
     offset.setValueAtTime(5, -100); // Animate offset for a moving dotted line effect
+
+
+    //add trim path to the shape layer and animate it
+    var trimPath = shapeLayer.property("Contents").addProperty("ADBE Vector Filter - Trim");
+    trimPath.property("Start").setValue(0);
+    trimPath.property("End").setValue(0);
+    trimPath.property("Offset").setValue(0);
+
+    // Animate to show from nothing to full line
+    trimPath.property("End").setValueAtTime(0, 0);
+    trimPath.property("End").setValueAtTime(0.3, 100);
+
+    //ease the keyframes
+    var easeIn = new KeyframeEase(0, 70); // Influence: 50%
+    var easeOut = new KeyframeEase(0, 70); // Influence: 50%
+    trimPath.property("End").setTemporalEaseAtKey(1, [easeIn], [easeOut]);
+    trimPath.property("End").setTemporalEaseAtKey(2, [easeIn], [easeOut]);
 
 
     app.endUndoGroup();

@@ -1,4 +1,5 @@
-function changeKeyframeVelocity(){
+//add loopOut() expression to selected layers
+function addLoopOut(){
     {
         // Get the active composition
         var comp = app.project.activeItem;
@@ -19,26 +20,20 @@ function changeKeyframeVelocity(){
                             // Loop through selected keyframes
                             for (var k = 1; k <= prop.numKeys; k++) {
                                 if (prop.keySelected(k)) {
-                                    // Define custom ease settings
-                                    var easeIn = new KeyframeEase(0, 70); // Influence: 50%
-                                    var easeOut = new KeyframeEase(0, 70); // Influence: 50%
-    
-                                    // Set ease for temporal keyframes (spatial keyframes need separate handling)
-                                    prop.setTemporalEaseAtKey(k, [easeIn], [easeOut]);
-    
-                                    // Optional: Adjust spatial tangents for motion paths (if it's a spatial property)
-                                    // prop.setSpatialTangentsAtKey(k, [50, 50], [-50, -50]);
+                                    // Add loopOut() expression to selected keyframes
+                                    prop.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);
+                                    prop.expression = "loopOut()";
                                 }
                             }
                         }
                     }
                 }
             }
-            alert("Keyframe ease adjusted!");
+            alert("loopOut() expression added to selected keyframes!");
         } else {
             alert("Please select a layer with keyframes.");
         }
     }
 }
 
-changeKeyframeVelocity();
+addLoopOut();
