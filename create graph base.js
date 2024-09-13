@@ -3,7 +3,7 @@ var version = "1.4.2";
 //screen size 1920 x 1080
 var height = 1080;
 var width = 1920;
-var duration = 60;
+var duration = 300;
 var numberOfMiddleLines = 0;// if you want to add custom number of horizontal lines, change this value(0 means number of y values - 1)
 var margin = 300;
 var strokeWidth = 4;
