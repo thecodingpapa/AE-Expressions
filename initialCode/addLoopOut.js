@@ -31,7 +31,7 @@ function addLoopOut(){
             }
             alert("loopOut() expression added to selected keyframes!");
         } else {
-            alert("Please select a layer with keyframes.");
+            alert("Please select a layer with keyframes in it.");
         }
     }
 }

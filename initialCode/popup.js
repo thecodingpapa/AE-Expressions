@@ -16,8 +16,7 @@
 
             // Time settings
             var startTime = comp.time; // Starting at the current time
-            var popUpDuration = 0.5; // 0.5 seconds for the pop-up
-            var totalDuration = 1.5; // 1.5 seconds for the entire animation
+            var popUpDuration = 0.3; // 0.5 seconds for the pop-up
 
             // Apply keyframes for the scale property
             scaleProperty.setValueAtTime(startTime, startScale);
@@ -25,9 +24,9 @@
 
             // Apply the provided bounce expression
             var bounceExpression = 
-                'amp = 0.1;' +  // Amplitude
+                'amp = 0.05;' +  // Amplitude
                 'freq = 2.0;' + // Frequency
-                'decay = 2.0;' + // Decay
+                'decay = 5.0;' + // Decay
                 'n = 0;' +
                 'if (numKeys > 0){' +
                     'n = nearestKey(time).index;' +
@@ -48,6 +47,15 @@
                 '}';
 
             scaleProperty.expression = bounceExpression;
+
+            //add ease to the first keyframe
+            var easeIn = new KeyframeEase(0, 100); // Influence: 100%
+            var easeOut = new KeyframeEase(0, 100); // Influence: 100%
+
+            //find the nearest keyframe index
+            var keyIndex = scaleProperty.nearestKeyIndex(startTime);
+
+            scaleProperty.setTemporalEaseAtKey(keyIndex, [easeIn, easeIn, easeIn], [easeOut, easeOut, easeOut]);
 
             app.endUndoGroup();
         } else {
