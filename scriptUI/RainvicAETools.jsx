@@ -1,4 +1,18 @@
 {
+
+  function showSoftNotification(message, duration) {
+    var notificationWindow = new Window("palette", "Notification", undefined, {
+      closeButton: false,
+    });
+    notificationWindow.add("statictext", undefined, message);
+    notificationWindow.show();
+  
+    // Automatically close the notification after the specified duration
+    app.setTimeout(function () {
+      notificationWindow.close();
+    }, duration);
+  }
+
     function createGraph(
         xStart,
         xEnd,
@@ -650,6 +664,7 @@
 
       // End undo group
       app.endUndoGroup();
+      showSoftNotification("Counting-up text layer created successfully!", 2000);
     } else {
       alert("Please select or open a composition first.");
     }
@@ -732,6 +747,9 @@
     trimPath.property("End").setTemporalEaseAtKey(2, [easeIn], [easeOut]);
 
     app.endUndoGroup();
+
+
+    showSoftNotification("Dotted line animation created successfully!", 2000);
   }
 
   function changeKeyframeVelocity() {
@@ -774,7 +792,7 @@
             }
           }
         }
-        alert("Keyframe ease adjusted!");
+        showSoftNotification("Keyframe velocity changed successfully!", 2000);
       } else {
         alert("Please select a layer with keyframes.");
       }
@@ -958,7 +976,7 @@
         true
       );
   
-      alert("Background shape with rounded corners and shadow created!");
+      showSoftNotification("Wrapped the selected layer successfully!", 2000);
     } else {
       alert("Please select a layer first.");
     }
@@ -1027,6 +1045,7 @@
         );
 
         app.endUndoGroup();
+        showSoftNotification("Pop-up animation applied successfully!", 2000);
       } else {
         alert("No layer selected. Please select a layer.");
       }
@@ -1104,12 +1123,42 @@
         [easeOut, easeOut, easeOut]
       ); // Outgoing ease on last keyframe
 
-      alert("Scale keyframes with 50% ease added!");
+      showSoftNotification("Scale keyframes added with ease!", 2000);
     } else {
       alert("Please select a layer.");
     }
 
     app.endUndoGroup();
+  }
+
+  function addWiggle(wiggleFreq,
+    wiggleAmp) {
+    // Get the active composition
+    var comp = app.project.activeItem;
+
+    // Ensure the composition is valid and something is selected
+    if (
+      comp != null &&
+      comp instanceof CompItem &&
+      comp.selectedLayers.length > 0
+    ) {
+      // Loop through selected layers
+      for (var i = 0; i < comp.selectedLayers.length; i++) {
+        var layer = comp.selectedLayers[i];
+
+        //add wiggle expression to the selected layer
+        var prop = layer.property("Position");
+
+        // Create the looping wiggle expression
+        var expression = 'wiggle('+wiggleFreq+', '+wiggleAmp+')';
+
+        // Add the expression to the property
+        prop.expression = expression;
+      }
+      showSoftNotification("Wiggle expression added to selected layers!", 2000);
+    } else {
+      alert("Please select a layer with keyframes in it.");
+    }
   }
 
   function addLoopOut() {
@@ -1144,7 +1193,7 @@
           // Start traversing from the layer's root property group
           traverseProperties(layer);
         }
-        alert("loopOut() expression added to selected keyframes!");
+        showSoftNotification("LoopOut expression added to selected layers!", 2000);
       } else {
         alert("Please select a layer with keyframes in it.");
       }
@@ -1168,6 +1217,8 @@
         : new Window("palette", undefined, undefined, { resizeable: true });
     dialog.text = "Rainvic's AE Tools V1.0";
     dialog.alignChildren = ["center", "top"];
+    // fill available space
+    dialog.orientation = "column";
     dialog.spacing = 10;
     dialog.margins = 12;
 
@@ -1221,6 +1272,63 @@
     var button3 = tab1.add("button", undefined, undefined, { name: "button3" });
     button3.text = "Scale Up! and Down!";
     button3.onClick = scaleUpDown;
+
+    var divider4 = tab1.add("panel", undefined, undefined, {
+      name: "divider4",
+    });
+    divider4.alignment = "fill";
+
+
+    var wiggleGroup = tab1.add("group", undefined, { name: "wiggleGroup" });
+    wiggleGroup.orientation = "row";
+    wiggleGroup.alignChildren = ["left", "center"];
+    wiggleGroup.spacing = 10;
+    wiggleGroup.margins = 0;
+
+
+    var button4 = wiggleGroup.add("button", undefined, undefined, { name: "button4" });
+    button4.text = "Wiggle!";
+    button4.onClick = function () {
+      addWiggle(freqOfWiggle.text, ampOfWiggle.text);
+    };
+
+    var freqGroup = wiggleGroup.add("group", undefined, { name: "freqGroup" });
+    freqGroup.orientation = "column";
+    freqGroup.alignChildren = ["center", "center"];
+    freqGroup.spacing = 0;
+    freqGroup.margins = 0;
+
+    var freqLabel = freqGroup.add("statictext", undefined, undefined, {
+      name: "freqLabel",
+    });
+    freqLabel.text = "Frequency";
+    freqLabel.fontSize = 9;
+    freqLabel.color = [0.5, 0.5, 0.5];
+
+    var freqOfWiggle = freqGroup.add(
+      'edittext {properties: {name: "freqOfWiggle", scrollable: true}}'
+    );
+    freqOfWiggle.text = "1";
+    freqOfWiggle.preferredSize.width = 50;
+
+    var ampGroup = wiggleGroup.add("group", undefined, { name: "ampGroup" });
+    ampGroup.orientation = "column";
+    ampGroup.alignChildren = ["center", "center"];
+    ampGroup.spacing = 0;
+    ampGroup.margins = 0;
+
+    var ampLabel = ampGroup.add("statictext", undefined, undefined, {
+      name: "ampLabel",
+    });
+    ampLabel.text = "Amplitude";
+    ampLabel.fontSize = 9;
+    ampLabel.color = [0.5, 0.5, 0.5];
+
+    var ampOfWiggle = ampGroup.add(
+      'edittext {properties: {name: "ampOfWiggle", scrollable: true}}'
+    );
+    ampOfWiggle.text = "10";
+    ampOfWiggle.preferredSize.width = 50;
 
     // TAB2
     // ====
