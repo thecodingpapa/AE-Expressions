@@ -1,574 +1,563 @@
 {
-
   function showSoftNotification(message, duration) {
     var notificationWindow = new Window("palette", "Notification", undefined, {
       closeButton: false,
     });
     notificationWindow.add("statictext", undefined, message);
     notificationWindow.show();
-  
+
     // Automatically close the notification after the specified duration
     app.setTimeout(function () {
       notificationWindow.close();
     }, duration);
   }
 
-    function createGraph(
-        xStart,
-        xEnd,
-        xStep,
-        yStart,
-        yEnd,
-        yStep,
-        margin,
-        strokeWidth,
-        fontSize,
-        color,
-        graphWidth,
-        graphColor,
-        duration
-      ) {
-        var version = "1.4.2";
-    
-        //screen size 1920 x 1080
-        var height = 1080;
-        var width = 1920;
-        var numberOfMiddleLines = 0; // if you want to add custom number of horizontal lines, change this value(0 means number of y values - 1)
-    
-        var textYPosFromBottomLine = 50;
-    
-        // var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
-        var xValues = [];
-        if (xValues.length == 0) {
-          for (
-            var i = xStart;
-            i <= xEnd;
-            i += xStep
-          ) {
-            xValues.push(i);
-          }
-        }
-    
-        // var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"];
-        var yValues = [];
-        if (yValues.length == 0) {
-          for (
-            var i = yStart;
-            i <= yEnd;
-            i += yStep
-          ) {
-            yValues.push(i);
-          }
-        }
-    
-        var textXPosFromLeftLine = 70;
-        var numOfGraphs = 3;
-    
-        /***
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
-         */
-    
-        // get timestamp of datetime
-        function getTimestamp() {
-          var date = new Date();
-          var timestamp = date.getTime();
-          return timestamp;
-        }
-    
-        //create graph name with timestamp
-        var graphName = "graph_anim_" + getTimestamp() + "(" + version + ")";
-        var linesName = "lines" + "(" + version + ")";
-        var xvaluesName = "xvalues" + "(" + version + ")";
-        var yvaluesName = "yvalues" + "(" + version + ")";
-        var graphsName = "graphs" + "(" + version + ")";
-    
-        // Create a new folder in the project
-        var project = app.project;
-        var folder = project.items.addFolder(graphName);
-    
-    
-        // Create a new composition
-        var graphAnimComp = app.project.items.addComp(
-          graphName,
-          width,
-          height,
-          1,
-          duration,
-          30
+  function createGraph(
+    xStart,
+    xEnd,
+    xStep,
+    yStart,
+    yEnd,
+    yStep,
+    margin,
+    strokeWidth,
+    fontSize,
+    color,
+    graphWidth,
+    graphColor,
+    duration
+  ) {
+    var version = "1.4.2";
+
+    //screen size 1920 x 1080
+    var height = 1080;
+    var width = 1920;
+    var numberOfMiddleLines = 0; // if you want to add custom number of horizontal lines, change this value(0 means number of y values - 1)
+
+    var textYPosFromBottomLine = 50;
+
+    // var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
+    var xValues = [];
+    if (xValues.length == 0) {
+      for (var i = xStart; i <= xEnd; i += xStep) {
+        xValues.push(i);
+      }
+    }
+
+    // var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"];
+    var yValues = [];
+    if (yValues.length == 0) {
+      for (var i = yStart; i <= yEnd; i += yStep) {
+        yValues.push(i);
+      }
+    }
+
+    var textXPosFromLeftLine = 70;
+    var numOfGraphs = 3;
+
+    /***
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     * DO NOT TOUCH THE CODE BELOW!!!!!!!!!!!!!!
+     */
+
+    // get timestamp of datetime
+    function getTimestamp() {
+      var date = new Date();
+      var timestamp = date.getTime();
+      return timestamp;
+    }
+
+    //create graph name with timestamp
+    var graphName = "graph_anim_" + getTimestamp() + "(" + version + ")";
+    var linesName = "lines" + "(" + version + ")";
+    var xvaluesName = "xvalues" + "(" + version + ")";
+    var yvaluesName = "yvalues" + "(" + version + ")";
+    var graphsName = "graphs" + "(" + version + ")";
+
+    // Create a new folder in the project
+    var project = app.project;
+    var folder = project.items.addFolder(graphName);
+
+    // Create a new composition
+    var graphAnimComp = app.project.items.addComp(
+      graphName,
+      width,
+      height,
+      1,
+      duration,
+      30
+    );
+
+    var linesComp = app.project.items.addComp(
+      linesName,
+      width,
+      height,
+      1,
+      duration,
+      30
+    );
+
+    var xvaluesComp = app.project.items.addComp(
+      xvaluesName,
+      width,
+      height,
+      1,
+      duration,
+      30
+    );
+
+    var yvaluesComp = app.project.items.addComp(
+      yvaluesName,
+      width,
+      height,
+      1,
+      duration,
+      30
+    );
+
+    var graphsComp = app.project.items.addComp(
+      graphsName,
+      width,
+      height,
+      1,
+      duration,
+      30
+    );
+
+    graphAnimComp.layers.add(linesComp);
+    graphAnimComp.layers.add(xvaluesComp);
+    graphAnimComp.layers.add(yvaluesComp);
+    graphAnimComp.layers.add(graphsComp);
+    var scaleControlLayer = graphAnimComp.layers.addNull();
+    scaleControlLayer.name = "Scale Control";
+
+    graphAnimComp.parentFolder = folder;
+    linesComp.parentFolder = folder;
+    xvaluesComp.parentFolder = folder;
+    yvaluesComp.parentFolder = folder;
+    graphsComp.parentFolder = folder;
+    scaleControlLayer.parentFolder = folder;
+
+    function createGraphLayers() {
+      var graphBaseName = "Graph_Base";
+
+      for (index = 0; index < numOfGraphs; index++) {
+        var shapeLayer = graphsComp.layers.addShape();
+        shapeLayer.name = graphBaseName + "_" + (index + 1);
+
+        //make Path in Shape in Contents in Shape Layer
+        var shapeGroup = shapeLayer
+          .property("ADBE Root Vectors Group")
+          .addProperty("ADBE Vector Group");
+        var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
+        shapeGroupContents.addProperty("ADBE Vector Shape - Group");
+        var stroke = shapeGroupContents.addProperty(
+          "ADBE Vector Graphic - Stroke"
         );
-    
-        var linesComp = app.project.items.addComp(
-          linesName,
-          width,
-          height,
-          1,
-          duration,
-          30
-        );
-    
-        var xvaluesComp = app.project.items.addComp(
-          xvaluesName,
-          width,
-          height,
-          1,
-          duration,
-          30
-        );
-        
-        var yvaluesComp = app.project.items.addComp(
-          yvaluesName,
-          width,
-          height,
-          1,
-          duration,
-          30
-        );
-        
-        var graphsComp = app.project.items.addComp(
-          graphsName,
-          width,
-          height,
-          1,
-            duration,
-          30
-        );
-        
-        graphAnimComp.layers.add(linesComp);
-        graphAnimComp.layers.add(xvaluesComp);
-        graphAnimComp.layers.add(yvaluesComp);
-        graphAnimComp.layers.add(graphsComp);
-        var scaleControlLayer = graphAnimComp.layers.addNull();
-        scaleControlLayer.name = "Scale Control";
-    
-    
-    
-        graphAnimComp.parentFolder = folder;
-        linesComp.parentFolder = folder;
-        xvaluesComp.parentFolder = folder;
-        yvaluesComp.parentFolder = folder;
-        graphsComp.parentFolder = folder;
-        scaleControlLayer.parentFolder = folder;
-    
-        function createGraphLayers() {
-          var graphBaseName = "Graph_Base";
-    
-          for (index = 0; index < numOfGraphs; index++) {
-            var shapeLayer = graphsComp.layers.addShape();
-            shapeLayer.name = graphBaseName + "_" + (index + 1);
-    
-            //make Path in Shape in Contents in Shape Layer
-            var shapeGroup = shapeLayer
-              .property("ADBE Root Vectors Group")
-              .addProperty("ADBE Vector Group");
-            var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
-            shapeGroupContents.addProperty("ADBE Vector Shape - Group");
-            var stroke = shapeGroupContents.addProperty(
-              "ADBE Vector Graphic - Stroke"
-            );
-    
-            stroke.property("ADBE Vector Stroke Color").setValue(graphColor); // Black color
-            stroke.property("ADBE Vector Stroke Width").setValue(graphWidth); // Line width
-          }
-        }
-    
-        function zoomGraphs() {
-          var layers = graphsComp.layers;
-          for (var i = 1; i <= layers.length; i++) {
-            var layer = layers[i];
-    
-            layer.property("Scale").expression =
-              'var scaleControlLayer = comp("' +
-              graphName +
-              '").layer("Scale Control");\n' +
-              "var endScaleValue = scaleControlLayer.scale;\n" +
-              "value = endScaleValue;";
-          }
-    
-          for (var i = 1; i <= layers.length; i++) {
-            var layer = layers[i];
-    
-            var initialPos = layer.property("Position").value;
-    
-            layer.property("Position").expression =
-              'var scaleControlLayer = comp("' +
-              graphName +
-              '").layer("Scale Control");\n' +
-              "var endScaleValue = scaleControlLayer.scale;\n" +
-              "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
-              "var anchorValueX = scaleControlLayer.anchorPoint[0] + " +
-              width / 2 +
-              ";\n" +
-              "var anchorValueY = scaleControlLayer.anchorPoint[1] + " +
-              height / 2 +
-              ";\n" +
-              "var anchorValue = [" +
-              initialPos[0] +
-              " - anchorValueX, " +
-              initialPos[1] +
-              " - anchorValueY];\n" +
-              "var moveDistance = [anchorValue[0]*scaleFactor[0], anchorValue[1]*scaleFactor[1]];\n" +
-              "value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];";
-          }
-        }
-    
-        // Function to create a shape layer with a line
-        function createLine(startPoint, endPoint, lineName) {
-          var start = [startPoint[0] - width / 2, startPoint[1] - height / 2];
-          var end = [endPoint[0] - width / 2, endPoint[1] - height / 2];
-          var shapeLayer = graphAnimComp.layers.addShape();
-          shapeLayer.name = lineName;
-          var shapeGroup = shapeLayer
-            .property("ADBE Root Vectors Group")
-            .addProperty("ADBE Vector Group");
-          var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
-          var pathGroup = shapeGroupContents.addProperty(
-            "ADBE Vector Shape - Group"
-          );
-          var path = pathGroup.property("ADBE Vector Shape");
-          var myPath = new Shape();
-          myPath.vertices = [start, end];
-          path.setValue(myPath);
-          var stroke = shapeGroupContents.addProperty(
-            "ADBE Vector Graphic - Stroke"
-          );
-          stroke.property("ADBE Vector Stroke Color").setValue(color); // Black color
-          stroke.property("ADBE Vector Stroke Width").setValue(strokeWidth); // Line width
-        }
-    
-        // Function to create a dotted line shape layer
-        function createDottedLine(
-          startPoint,
-          endPoint,
-          lineName,
-          dashLength,
-          gapLength
-        ) {
-          // Set default values if they are not provided
-          dashLength = dashLength !== undefined ? dashLength : 2;
-          gapLength = gapLength !== undefined ? gapLength : 10;
-    
-          var start = [startPoint[0] - width / 2, startPoint[1] - height / 2];
-          var end = [endPoint[0] - width / 2, endPoint[1] - height / 2];
-    
-          var shapeLayer = linesComp.layers.addShape();
-          shapeLayer.name = lineName;
-          var shapeGroup = shapeLayer
-            .property("ADBE Root Vectors Group")
-            .addProperty("ADBE Vector Group");
-          var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
-          var pathGroup = shapeGroupContents.addProperty(
-            "ADBE Vector Shape - Group"
-          );
-          var path = pathGroup.property("ADBE Vector Shape");
-          var myPath = new Shape();
-          myPath.vertices = [start, end];
-          path.setValue(myPath);
-          var stroke = shapeGroupContents.addProperty(
-            "ADBE Vector Graphic - Stroke"
-          );
-          stroke.property("ADBE Vector Stroke Color").setValue(color); // Black color
-          stroke.property("ADBE Vector Stroke Width").setValue(strokeWidth); // Line width
-          var dashGroup = stroke.property("ADBE Vector Stroke Dashes");
-          var dash = dashGroup.addProperty("ADBE Vector Stroke Dash 1");
-          dash.setValue(dashLength); // Dash length
-          var gap = dashGroup.addProperty("ADBE Vector Stroke Gap 1");
-          gap.setValue(gapLength); // Gap length
-        }
-    
-        //set the stroke not to affected the thickness by zooming
-        function keepStrokeWidthConstant(layers, constantWidth) {
-          // Add a Slider Control to the "Main" composition for stroke width
-          var scaleController = graphAnimComp.layer("Scale Control");
-          var sliderControl = scaleController
-            .property("Effects")
-            .addProperty("ADBE Slider Control");
-          sliderControl.name = "Stroke Width Control";
-          sliderControl.property("Slider").setValue(constantWidth); // Default stroke width, adjust as needed
-    
-          var scaleExpression =
-            'targetScale = comp("' +
-            graphName +
-            '").layer("Scale Control").transform.scale[1] / 100;\n' +
-            'initialStrokeWidth = comp("' +
-            graphName +
-            '").layer("Scale Control").effect("Stroke Width Control")("Slider");\n' +
-            "initialStrokeWidth / targetScale;";
-    
-          for (var i = 1; i <= layers.length; i++) {
-            var layer = layers[i];
-    
-            if (layer.property("Contents")) {
-              var contents = layer.property("Contents");
-    
-              for (var j = 1; j <= contents.numProperties; j++) {
-                var shapeGroup = contents.property(j);
-    
-                if (shapeGroup.property("Contents")) {
-                  var shapeContents = shapeGroup.property("Contents");
-    
-                  for (var k = 1; k <= shapeContents.numProperties; k++) {
-                    var shapeElement = shapeContents.property(k);
-    
-                    if (shapeElement.matchName == "ADBE Vector Graphic - Stroke") {
-                      var width = shapeElement.property("ADBE Vector Stroke Width");
-                      width.expression = scaleExpression;
-                    }
-                  }
+
+        stroke.property("ADBE Vector Stroke Color").setValue(graphColor); // Black color
+        stroke.property("ADBE Vector Stroke Width").setValue(graphWidth); // Line width
+      }
+    }
+
+    function zoomGraphs() {
+      var layers = graphsComp.layers;
+      for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        layer.property("Scale").expression =
+          'var scaleControlLayer = comp("' +
+          graphName +
+          '").layer("Scale Control");\n' +
+          "var endScaleValue = scaleControlLayer.scale;\n" +
+          "value = endScaleValue;";
+      }
+
+      for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        var initialPos = layer.property("Position").value;
+
+        layer.property("Position").expression =
+          'var scaleControlLayer = comp("' +
+          graphName +
+          '").layer("Scale Control");\n' +
+          "var endScaleValue = scaleControlLayer.scale;\n" +
+          "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
+          "var anchorValueX = scaleControlLayer.anchorPoint[0] + " +
+          width / 2 +
+          ";\n" +
+          "var anchorValueY = scaleControlLayer.anchorPoint[1] + " +
+          height / 2 +
+          ";\n" +
+          "var anchorValue = [" +
+          initialPos[0] +
+          " - anchorValueX, " +
+          initialPos[1] +
+          " - anchorValueY];\n" +
+          "var moveDistance = [anchorValue[0]*scaleFactor[0], anchorValue[1]*scaleFactor[1]];\n" +
+          "value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];";
+      }
+    }
+
+    // Function to create a shape layer with a line
+    function createLine(startPoint, endPoint, lineName) {
+      var start = [startPoint[0] - width / 2, startPoint[1] - height / 2];
+      var end = [endPoint[0] - width / 2, endPoint[1] - height / 2];
+      var shapeLayer = graphAnimComp.layers.addShape();
+      shapeLayer.name = lineName;
+      var shapeGroup = shapeLayer
+        .property("ADBE Root Vectors Group")
+        .addProperty("ADBE Vector Group");
+      var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
+      var pathGroup = shapeGroupContents.addProperty(
+        "ADBE Vector Shape - Group"
+      );
+      var path = pathGroup.property("ADBE Vector Shape");
+      var myPath = new Shape();
+      myPath.vertices = [start, end];
+      path.setValue(myPath);
+      var stroke = shapeGroupContents.addProperty(
+        "ADBE Vector Graphic - Stroke"
+      );
+      stroke.property("ADBE Vector Stroke Color").setValue(color); // Black color
+      stroke.property("ADBE Vector Stroke Width").setValue(strokeWidth); // Line width
+    }
+
+    // Function to create a dotted line shape layer
+    function createDottedLine(
+      startPoint,
+      endPoint,
+      lineName,
+      dashLength,
+      gapLength
+    ) {
+      // Set default values if they are not provided
+      dashLength = dashLength !== undefined ? dashLength : 2;
+      gapLength = gapLength !== undefined ? gapLength : 10;
+
+      var start = [startPoint[0] - width / 2, startPoint[1] - height / 2];
+      var end = [endPoint[0] - width / 2, endPoint[1] - height / 2];
+
+      var shapeLayer = linesComp.layers.addShape();
+      shapeLayer.name = lineName;
+      var shapeGroup = shapeLayer
+        .property("ADBE Root Vectors Group")
+        .addProperty("ADBE Vector Group");
+      var shapeGroupContents = shapeGroup.property("ADBE Vectors Group");
+      var pathGroup = shapeGroupContents.addProperty(
+        "ADBE Vector Shape - Group"
+      );
+      var path = pathGroup.property("ADBE Vector Shape");
+      var myPath = new Shape();
+      myPath.vertices = [start, end];
+      path.setValue(myPath);
+      var stroke = shapeGroupContents.addProperty(
+        "ADBE Vector Graphic - Stroke"
+      );
+      stroke.property("ADBE Vector Stroke Color").setValue(color); // Black color
+      stroke.property("ADBE Vector Stroke Width").setValue(strokeWidth); // Line width
+      var dashGroup = stroke.property("ADBE Vector Stroke Dashes");
+      var dash = dashGroup.addProperty("ADBE Vector Stroke Dash 1");
+      dash.setValue(dashLength); // Dash length
+      var gap = dashGroup.addProperty("ADBE Vector Stroke Gap 1");
+      gap.setValue(gapLength); // Gap length
+    }
+
+    //set the stroke not to affected the thickness by zooming
+    function keepStrokeWidthConstant(layers, constantWidth) {
+      // Add a Slider Control to the "Main" composition for stroke width
+      var scaleController = graphAnimComp.layer("Scale Control");
+      var sliderControl = scaleController
+        .property("Effects")
+        .addProperty("ADBE Slider Control");
+      sliderControl.name = "Stroke Width Control";
+      sliderControl.property("Slider").setValue(constantWidth); // Default stroke width, adjust as needed
+
+      var scaleExpression =
+        'targetScale = comp("' +
+        graphName +
+        '").layer("Scale Control").transform.scale[1] / 100;\n' +
+        'initialStrokeWidth = comp("' +
+        graphName +
+        '").layer("Scale Control").effect("Stroke Width Control")("Slider");\n' +
+        "initialStrokeWidth / targetScale;";
+
+      for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        if (layer.property("Contents")) {
+          var contents = layer.property("Contents");
+
+          for (var j = 1; j <= contents.numProperties; j++) {
+            var shapeGroup = contents.property(j);
+
+            if (shapeGroup.property("Contents")) {
+              var shapeContents = shapeGroup.property("Contents");
+
+              for (var k = 1; k <= shapeContents.numProperties; k++) {
+                var shapeElement = shapeContents.property(k);
+
+                if (shapeElement.matchName == "ADBE Vector Graphic - Stroke") {
+                  var width = shapeElement.property("ADBE Vector Stroke Width");
+                  width.expression = scaleExpression;
                 }
               }
             }
           }
         }
-    
-        function centerAnchorPoint(layer) {
-          var comp = layer.containingComp;
-          var curTime = comp.time;
-    
-          /* find center by bounding box of the layer */
-          var y = layer.sourceRectAtTime(curTime, false).height / 2;
-          var x = layer.sourceRectAtTime(curTime, false).width / 2;
-    
-          /* we need this for text layer */
-          y += layer.sourceRectAtTime(curTime, false).top;
-          x += layer.sourceRectAtTime(curTime, false).left;
-    
-          //set only y anchor point
-          layer.anchorPoint.setValue([x, y]);
-        }
-    
-        function createXText(position, textContent, textName) {
-          var textLayer = xvaluesComp.layers.addText(textContent);
-    
-          (textProp = textLayer
-            .property("ADBE Text Properties")
-            .property("ADBE Text Document")),
-            (textDoc = textProp.value);
-          textDoc.fontSize = fontSize;
-          textDoc.fillColor = color;
-          textProp.setValue(textDoc);
-    
-          centerAnchorPoint(textLayer);
-          textLayer.name = textName;
-          textLayer.property("Position").setValue(position);
-    
-          // // Store the distance in the text layer's comment so it can be accessed later
-          textLayer.comment = position[0].toString();
-        }
-    
-        function createYText(position, textContent, textName) {
-          var textLayer = yvaluesComp.layers.addText(textContent);
-    
-          (textProp = textLayer
-            .property("ADBE Text Properties")
-            .property("ADBE Text Document")),
-            (textDoc = textProp.value);
-          textDoc.fontSize = fontSize;
-          textDoc.fillColor = color;
-          textProp.setValue(textDoc);
-    
-          centerAnchorPoint(textLayer);
-          textLayer.name = textName;
-          textLayer.property("Position").setValue(position);
-    
-          // // Store the distance in the text layer's comment so it can be accessed later
-          textLayer.comment =
-            position[0].toString() + "##" + position[1].toString();
-        }
-    
-        function zoomLayer(layer, startScale, endScale, startTime, endTime) {
-          var scale = layer.property("Scale");
-    
-          // Add start keyframe
-          var startKeyframe = scale.addKey(startTime);
-          scale.setValueAtKey(startKeyframe, startScale);
-    
-          // Add end keyframe
-          var endKeyframe = scale.addKey(endTime);
-          scale.setValueAtKey(endKeyframe, endScale);
-        }
-    
-        function zoomXvalues() {
-          // Add expression to each text layer
-          for (var i = 1; i <= xvaluesComp.numLayers; i++) {
-            var layer = xvaluesComp.layer(i);
-    
-            var initialPosX = parseFloat(layer.comment.split("##")[0]);
-    
-            // Add expression to the Position property
-            layer.property("Position").expression =
-              'var scaleControlLayer = comp("' +
-              graphName +
-              '").layer("Scale Control");\n' +
-              "var endScaleValue = scaleControlLayer.scale[0];\n" +
-              "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
-              "var anchorValue = scaleControlLayer.anchorPoint[0] + " +
-              width / 2 +
-              ";\n" +
-              "var moveDistance = (" +
-              initialPosX +
-              " - anchorValue) * scaleFactor;\n" +
-              "value = [moveDistance + anchorValue, thisLayer.position[1]];";
-          }
-        }
-    
-        function zoomYvalues() {
-          // Add expression to each text layer
-          for (var i = 1; i <= yvaluesComp.numLayers; i++) {
-            var layer = yvaluesComp.layer(i);
-    
-            var initialPosY = parseFloat(layer.comment.split("##")[1]);
-    
-            // Add expression to the Position property
-            layer.property("Position").expression =
-              'var scaleControlLayer = comp("' +
-              graphName +
-              '").layer("Scale Control");\n' +
-              "var endScaleValue = scaleControlLayer.scale[1];\n" +
-              "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
-              "var anchorValue = scaleControlLayer.anchorPoint[1] + " +
-              height / 2 +
-              ";\n" +
-              "var moveDistance = (" +
-              initialPosY +
-              " - anchorValue) * scaleFactor;\n" +
-              "value = [thisLayer.position[0], moveDistance + anchorValue];";
-          }
-        }
-    
-        function zoomLines() {
-          var layers = linesComp.layers;
-          for (var i = 1; i <= layers.length; i++) {
-            var layer = layers[i];
-    
-            layer.property("Scale").expression =
-              'var scaleControlLayer = comp("' +
-              graphName +
-              '").layer("Scale Control");\n' +
-              "var endScaleValue = scaleControlLayer.scale;\n" +
-              "value = endScaleValue;";
-          }
-    
-          for (var i = 1; i <= layers.length; i++) {
-            var layer = layers[i];
-    
-            var initialPos = layer.property("Position").value;
-    
-            layer.property("Position").expression =
-              'var scaleControlLayer = comp("' +
-              graphName +
-              '").layer("Scale Control");\n' +
-              "var endScaleValue = scaleControlLayer.scale;\n" +
-              "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
-              "var anchorValueX = scaleControlLayer.anchorPoint[0] + " +
-              width / 2 +
-              ";\n" +
-              "var anchorValueY = scaleControlLayer.anchorPoint[1] + " +
-              height / 2 +
-              ";\n" +
-              "var anchorValue = [" +
-              initialPos[0] +
-              " - anchorValueX, " +
-              initialPos[1] +
-              " - anchorValueY];\n" +
-              "var moveDistance = [anchorValue[0]*scaleFactor[0], anchorValue[1]*scaleFactor[1]];\n" +
-              "value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];";
-          }
-        }
-    
-        // Dimensions
-        var compWidth = linesComp.width;
-        var compHeight = linesComp.height;
-    
-        // Create left vertical line
-        createLine(
-          [margin, margin],
-          [margin, compHeight - margin],
-          "Left Vertical Line"
-        );
-    
-        // Create bottom horizontal line
-        createLine(
-          [margin, compHeight - margin],
-          [compWidth - margin, compHeight - margin],
-          "Bottom Horizontal Line"
-        );
-    
-        if (numberOfMiddleLines == 0) {
-          numberOfMiddleLines = yValues.length - 2;
-        }
-    
-        // Create three horizontal lines spread through
-        for (var i = 1; i <= numberOfMiddleLines; i++) {
-          var yPos =
-            compHeight -
-            margin -
-            (i * (compHeight - 2 * margin)) / (numberOfMiddleLines + 1);
-          createDottedLine(
-            [margin, yPos],
-            [compWidth - margin, yPos],
-            "Horizontal Line " + i
-          );
-        }
-    
-        // Create text layers below the bottom horizontal line
-        var textYPos = compHeight - margin + textYPosFromBottomLine; // adjust textHeight as needed
-        for (var i = 1; i <= xValues.length; i++) {
-          var xPos =
-            margin + ((i - 1) * (compWidth - 2 * margin)) / (xValues.length - 1);
-          createXText([xPos, textYPos], xValues[i - 1], xValues[i - 1]);
-        }
-    
-        // Create text layers to the left of the vertical line
-        var textXPos = margin - textXPosFromLeftLine; // adjust textXPosFromLeftLine as needed
-        for (var i = 1; i <= yValues.length; i++) {
-          var yPos =
-            compHeight -
-            margin -
-            ((i - 1) * (compHeight - 2 * margin)) / (yValues.length - 1);
-          createYText([textXPos, yPos], yValues[i - 1], yValues[i - 1]);
-        }
-    
-        createGraphLayers();
-    
-        // Apply the zoom effect to the null layer
-        zoomLayer(scaleControlLayer, [100, 100], [200, 200], 1, 2);
-    
-        zoomLines();
-        zoomGraphs();
-        zoomXvalues();
-        zoomYvalues();
-        // xValuesFadeOutWhenOutOfGraphArea();
-        keepStrokeWidthConstant(linesComp.layers, strokeWidth);
-        keepStrokeWidthConstant(graphsComp.layers, graphWidth);
-    
-        
-        // Add the graphAnimComp to the currently opened composition
-        var activeComp = app.project.activeItem;
-        if (activeComp && activeComp instanceof CompItem) {
-            activeComp.layers.add(graphAnimComp);
-        } else {
-            alert("No active composition found. Click the timeline to make a composition active. Then create graph again.");
-        }
       }
+    }
+
+    function centerAnchorPoint(layer) {
+      var comp = layer.containingComp;
+      var curTime = comp.time;
+
+      /* find center by bounding box of the layer */
+      var y = layer.sourceRectAtTime(curTime, false).height / 2;
+      var x = layer.sourceRectAtTime(curTime, false).width / 2;
+
+      /* we need this for text layer */
+      y += layer.sourceRectAtTime(curTime, false).top;
+      x += layer.sourceRectAtTime(curTime, false).left;
+
+      //set only y anchor point
+      layer.anchorPoint.setValue([x, y]);
+    }
+
+    function createXText(position, textContent, textName) {
+      var textLayer = xvaluesComp.layers.addText(textContent);
+
+      (textProp = textLayer
+        .property("ADBE Text Properties")
+        .property("ADBE Text Document")),
+        (textDoc = textProp.value);
+      textDoc.fontSize = fontSize;
+      textDoc.fillColor = color;
+      textProp.setValue(textDoc);
+
+      centerAnchorPoint(textLayer);
+      textLayer.name = textName;
+      textLayer.property("Position").setValue(position);
+
+      // // Store the distance in the text layer's comment so it can be accessed later
+      textLayer.comment = position[0].toString();
+    }
+
+    function createYText(position, textContent, textName) {
+      var textLayer = yvaluesComp.layers.addText(textContent);
+
+      (textProp = textLayer
+        .property("ADBE Text Properties")
+        .property("ADBE Text Document")),
+        (textDoc = textProp.value);
+      textDoc.fontSize = fontSize;
+      textDoc.fillColor = color;
+      textProp.setValue(textDoc);
+
+      centerAnchorPoint(textLayer);
+      textLayer.name = textName;
+      textLayer.property("Position").setValue(position);
+
+      // // Store the distance in the text layer's comment so it can be accessed later
+      textLayer.comment =
+        position[0].toString() + "##" + position[1].toString();
+    }
+
+    function zoomLayer(layer, startScale, endScale, startTime, endTime) {
+      var scale = layer.property("Scale");
+
+      // Add start keyframe
+      var startKeyframe = scale.addKey(startTime);
+      scale.setValueAtKey(startKeyframe, startScale);
+
+      // Add end keyframe
+      var endKeyframe = scale.addKey(endTime);
+      scale.setValueAtKey(endKeyframe, endScale);
+    }
+
+    function zoomXvalues() {
+      // Add expression to each text layer
+      for (var i = 1; i <= xvaluesComp.numLayers; i++) {
+        var layer = xvaluesComp.layer(i);
+
+        var initialPosX = parseFloat(layer.comment.split("##")[0]);
+
+        // Add expression to the Position property
+        layer.property("Position").expression =
+          'var scaleControlLayer = comp("' +
+          graphName +
+          '").layer("Scale Control");\n' +
+          "var endScaleValue = scaleControlLayer.scale[0];\n" +
+          "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
+          "var anchorValue = scaleControlLayer.anchorPoint[0] + " +
+          width / 2 +
+          ";\n" +
+          "var moveDistance = (" +
+          initialPosX +
+          " - anchorValue) * scaleFactor;\n" +
+          "value = [moveDistance + anchorValue, thisLayer.position[1]];";
+      }
+    }
+
+    function zoomYvalues() {
+      // Add expression to each text layer
+      for (var i = 1; i <= yvaluesComp.numLayers; i++) {
+        var layer = yvaluesComp.layer(i);
+
+        var initialPosY = parseFloat(layer.comment.split("##")[1]);
+
+        // Add expression to the Position property
+        layer.property("Position").expression =
+          'var scaleControlLayer = comp("' +
+          graphName +
+          '").layer("Scale Control");\n' +
+          "var endScaleValue = scaleControlLayer.scale[1];\n" +
+          "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
+          "var anchorValue = scaleControlLayer.anchorPoint[1] + " +
+          height / 2 +
+          ";\n" +
+          "var moveDistance = (" +
+          initialPosY +
+          " - anchorValue) * scaleFactor;\n" +
+          "value = [thisLayer.position[0], moveDistance + anchorValue];";
+      }
+    }
+
+    function zoomLines() {
+      var layers = linesComp.layers;
+      for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        layer.property("Scale").expression =
+          'var scaleControlLayer = comp("' +
+          graphName +
+          '").layer("Scale Control");\n' +
+          "var endScaleValue = scaleControlLayer.scale;\n" +
+          "value = endScaleValue;";
+      }
+
+      for (var i = 1; i <= layers.length; i++) {
+        var layer = layers[i];
+
+        var initialPos = layer.property("Position").value;
+
+        layer.property("Position").expression =
+          'var scaleControlLayer = comp("' +
+          graphName +
+          '").layer("Scale Control");\n' +
+          "var endScaleValue = scaleControlLayer.scale;\n" +
+          "var scaleFactor = endScaleValue / 100; // Assuming the start scale is 100%\n" +
+          "var anchorValueX = scaleControlLayer.anchorPoint[0] + " +
+          width / 2 +
+          ";\n" +
+          "var anchorValueY = scaleControlLayer.anchorPoint[1] + " +
+          height / 2 +
+          ";\n" +
+          "var anchorValue = [" +
+          initialPos[0] +
+          " - anchorValueX, " +
+          initialPos[1] +
+          " - anchorValueY];\n" +
+          "var moveDistance = [anchorValue[0]*scaleFactor[0], anchorValue[1]*scaleFactor[1]];\n" +
+          "value = [moveDistance[0] + anchorValueX, moveDistance[1] + anchorValueY];";
+      }
+    }
+
+    // Dimensions
+    var compWidth = linesComp.width;
+    var compHeight = linesComp.height;
+
+    // Create left vertical line
+    createLine(
+      [margin, margin],
+      [margin, compHeight - margin],
+      "Left Vertical Line"
+    );
+
+    // Create bottom horizontal line
+    createLine(
+      [margin, compHeight - margin],
+      [compWidth - margin, compHeight - margin],
+      "Bottom Horizontal Line"
+    );
+
+    if (numberOfMiddleLines == 0) {
+      numberOfMiddleLines = yValues.length - 2;
+    }
+
+    // Create three horizontal lines spread through
+    for (var i = 1; i <= numberOfMiddleLines; i++) {
+      var yPos =
+        compHeight -
+        margin -
+        (i * (compHeight - 2 * margin)) / (numberOfMiddleLines + 1);
+      createDottedLine(
+        [margin, yPos],
+        [compWidth - margin, yPos],
+        "Horizontal Line " + i
+      );
+    }
+
+    // Create text layers below the bottom horizontal line
+    var textYPos = compHeight - margin + textYPosFromBottomLine; // adjust textHeight as needed
+    for (var i = 1; i <= xValues.length; i++) {
+      var xPos =
+        margin + ((i - 1) * (compWidth - 2 * margin)) / (xValues.length - 1);
+      createXText([xPos, textYPos], xValues[i - 1], xValues[i - 1]);
+    }
+
+    // Create text layers to the left of the vertical line
+    var textXPos = margin - textXPosFromLeftLine; // adjust textXPosFromLeftLine as needed
+    for (var i = 1; i <= yValues.length; i++) {
+      var yPos =
+        compHeight -
+        margin -
+        ((i - 1) * (compHeight - 2 * margin)) / (yValues.length - 1);
+      createYText([textXPos, yPos], yValues[i - 1], yValues[i - 1]);
+    }
+
+    createGraphLayers();
+
+    // Apply the zoom effect to the null layer
+    zoomLayer(scaleControlLayer, [100, 100], [200, 200], 1, 2);
+
+    zoomLines();
+    zoomGraphs();
+    zoomXvalues();
+    zoomYvalues();
+    // xValuesFadeOutWhenOutOfGraphArea();
+    keepStrokeWidthConstant(linesComp.layers, strokeWidth);
+    keepStrokeWidthConstant(graphsComp.layers, graphWidth);
+
+    // Add the graphAnimComp to the currently opened composition
+    var activeComp = app.project.activeItem;
+    if (activeComp && activeComp instanceof CompItem) {
+      activeComp.layers.add(graphAnimComp);
+    } else {
+      alert(
+        "No active composition found. Click the timeline to make a composition active. Then create graph again."
+      );
+    }
+  }
 
   function counterUp(start, end) {
     // Create a new text layer with a slider controlling the number counting-up effect with easing
@@ -640,12 +629,13 @@
         endValue = 1000000;
       }
 
-
       expression =
-      'var number = Math.round(Math.pow(effect("Slider Control")("Slider"), '+powerFactor.toString()+'));' +
-      'const formatter = new Intl.NumberFormat("en-US");' +
-      "const formattedNumber = formatter.format(number);" +
-      '"$" + formattedNumber;';
+        'var number = Math.round(Math.pow(effect("Slider Control")("Slider"), ' +
+        powerFactor.toString() +
+        "));" +
+        'const formatter = new Intl.NumberFormat("en-US");' +
+        "const formattedNumber = formatter.format(number);" +
+        '"$" + formattedNumber;';
 
       // Set the slider at startValue at the beginning
       slider.setValueAtTime(comp.time, startValue);
@@ -664,7 +654,10 @@
 
       // End undo group
       app.endUndoGroup();
-      showSoftNotification("Counting-up text layer created successfully!", 2000);
+      showSoftNotification(
+        "Counting-up text layer created successfully!",
+        2000
+      );
     } else {
       alert("Please select or open a composition first.");
     }
@@ -751,7 +744,6 @@
     trimPath.property("End").setTemporalEaseAtKey(2, [easeIn], [easeOut]);
 
     app.endUndoGroup();
-
 
     showSoftNotification("Dotted line animation created successfully!", 2000);
   }
@@ -841,49 +833,46 @@
     ) {
       var comp = app.project.activeItem;
       var selectedLayer = comp.selectedLayers[0]; // Get the first selected layer
-  
+
       // Get the layer's content bounding box
       var layerRect = selectedLayer.sourceRectAtTime(comp.time, false);
-  
+
       // Get the current layer's position
       var layerPos = selectedLayer.position.value;
-  
+
       // Calculate the center of the content
       var anchorX = layerRect.left + layerRect.width / 2;
       var anchorY = layerRect.top + layerRect.height / 2;
-  
+
       // Set the anchor point to the center of the content
       selectedLayer.anchorPoint.setValue([anchorX, anchorY]);
-  
+
       // Adjust the layer's position to compensate for the anchor point change
       var deltaX = anchorX - selectedLayer.anchorPoint.value[0];
       var deltaY = anchorY - selectedLayer.anchorPoint.value[1];
-  
+
       //check if the layer has a keyframe in position property
       if (selectedLayer.property("Position").numKeys > 0) {
-          selectedLayer.position.setValueAtTime(
-              comp.time,
-              [
-                  layerPos[0] + deltaX,
-                  layerPos[1] + deltaY,
-              ]
-              );
-      }else{
-      selectedLayer.position.setValue([
-        layerPos[0] + deltaX,
-        layerPos[1] + deltaY,
-      ]);
-  }
-  
+        selectedLayer.position.setValueAtTime(comp.time, [
+          layerPos[0] + deltaX,
+          layerPos[1] + deltaY,
+        ]);
+      } else {
+        selectedLayer.position.setValue([
+          layerPos[0] + deltaX,
+          layerPos[1] + deltaY,
+        ]);
+      }
+
       // Get the dimensions of the selected layer
       var layerWidth = layerRect.width;
       var layerHeight = layerRect.height;
       var layerPos = selectedLayer.position.value;
-  
+
       // Add a shape layer for the background box
       var shapeLayer = comp.layers.addShape();
       shapeLayer.name = selectedLayer.name + "_background";
-  
+
       // Create a rectangle path
       var rectGroup = shapeLayer
         .property("Contents")
@@ -891,35 +880,35 @@
       var rectPath = rectGroup
         .property("Contents")
         .addProperty("ADBE Vector Shape - Rect");
-  
+
       // Set rectangle size (with a margin)
       var margin = 20;
       rectPath
         .property("Size")
         .setValue([layerWidth + margin * 2, layerHeight + margin * 2]);
-  
+
       // Set position behind the selected layer
       shapeLayer.property("Position").setValue([layerPos[0], layerPos[1]]);
-  
+
       // Add rounded corners
       var roundedCorners = rectGroup
         .property("Contents")
         .addProperty("ADBE Vector Filter - RC");
       roundedCorners.property("Radius").setValue(20); // Adjust corner radius as needed
-  
+
       // Add fill color
       var fill = rectGroup
         .property("Contents")
         .addProperty("ADBE Vector Graphic - Fill");
       fill.property("Color").setValue([1, 1, 1]); // Adjust fill color as needed
-  
+
       // Add stroke (outline)
       var stroke = rectGroup
         .property("Contents")
         .addProperty("ADBE Vector Graphic - Stroke");
       stroke.property("Color").setValue([0, 0, 0]); // Adjust stroke color as needed
       stroke.property("Stroke Width").setValue(0.0); // Adjust stroke width as needed
-  
+
       // Add drop shadow effect
       var dropShadow = shapeLayer
         .property("Effects")
@@ -928,30 +917,35 @@
       dropShadow.property("Distance").setValue(18); // Adjust shadow distance
       dropShadow.property("Direction").setValue(135); // Adjust shadow direction
       dropShadow.property("Softness").setValue(20); // Adjust shadow softness
-  
+
       //check if the threeDLayer property is True on the selected layer
       if (selectedLayer.threeDLayer) {
         // Set the shape layer to be a 3D layer
         shapeLayer.threeDLayer = true;
-  
+
         //check if the selected layer has a keyframe in orientation property
-        if(selectedLayer.property("Orientation").numKeys > 0){
+        if (selectedLayer.property("Orientation").numKeys > 0) {
           // copy the orientation keyframes to the shape
-          for (var i = 1; i <= selectedLayer.property("Orientation").numKeys; i++) {
+          for (
+            var i = 1;
+            i <= selectedLayer.property("Orientation").numKeys;
+            i++
+          ) {
             var keyTime = selectedLayer.property("Orientation").keyTime(i);
             var keyValue = selectedLayer.property("Orientation").keyValue(i);
-            shapeLayer.property("Orientation").setValueAtTime(keyTime, keyValue);
+            shapeLayer
+              .property("Orientation")
+              .setValueAtTime(keyTime, keyValue);
           }
-          }else{
-  
-        var orient = selectedLayer.property("Orientation").value
-        shapeLayer.property("Orientation").setValue(orient);
-          }
+        } else {
+          var orient = selectedLayer.property("Orientation").value;
+          shapeLayer.property("Orientation").setValue(orient);
+        }
       }
-  
+
       // Send the shape layer behind the selected layer
       shapeLayer.moveAfter(selectedLayer);
-  
+
       // check if there is any keyframe on the selected layer in scale, position, rotation, opacity property, if so, copy the keyframes to the shape layer
       var properties = ["Scale", "Position", "Rotation", "Opacity"];
       for (var i = 0; i < properties.length; i++) {
@@ -964,22 +958,22 @@
             var keyValue = selectedLayerProperty.keyValue(j);
             shapeLayerProperty.setValueAtTime(keyTime, keyValue);
           }
-        }else{
+        } else {
           shapeLayerProperty.setValue(selectedLayerProperty.value);
         }
       }
-  
+
       // Select both layers
       selectedLayer.selected = true;
       shapeLayer.selected = true;
-  
+
       // Precompose the selected layers
       var precomp = comp.layers.precompose(
         [selectedLayer.index, shapeLayer.index],
         selectedLayer.name + "_group",
         true
       );
-  
+
       showSoftNotification("Wrapped the selected layer successfully!", 2000);
     } else {
       alert("Please select a layer first.");
@@ -1135,8 +1129,7 @@
     app.endUndoGroup();
   }
 
-  function addWiggle(wiggleFreq,
-    wiggleAmp) {
+  function addWiggle(wiggleFreq, wiggleAmp) {
     // Get the active composition
     var comp = app.project.activeItem;
 
@@ -1154,7 +1147,7 @@
         var prop = layer.property("Position");
 
         // Create the looping wiggle expression
-        var expression = 'wiggle('+wiggleFreq+', '+wiggleAmp+')';
+        var expression = "wiggle(" + wiggleFreq + ", " + wiggleAmp + ")";
 
         // Add the expression to the property
         prop.expression = expression;
@@ -1169,7 +1162,7 @@
     {
       // Get the active composition
       var comp = app.project.activeItem;
-  
+
       // Ensure the composition is valid and something is selected
       if (
         comp != null &&
@@ -1179,7 +1172,7 @@
         // Loop through selected layers
         for (var i = 0; i < comp.selectedLayers.length; i++) {
           var layer = comp.selectedLayers[i];
-  
+
           // Function to recursively traverse properties
           function traverseProperties(propertyGroup) {
             for (var j = 1; j <= propertyGroup.numProperties; j++) {
@@ -1193,11 +1186,14 @@
               }
             }
           }
-  
+
           // Start traversing from the layer's root property group
           traverseProperties(layer);
         }
-        showSoftNotification("LoopOut expression added to selected layers!", 2000);
+        showSoftNotification(
+          "LoopOut expression added to selected layers!",
+          2000
+        );
       } else {
         alert("Please select a layer with keyframes in it.");
       }
@@ -1205,10 +1201,9 @@
   }
 
   function removeBlackBG() {
-
     // Get the active composition
     var comp = app.project.activeItem;
-  
+
     // Ensure the composition is valid and something is selected
     if (
       comp != null &&
@@ -1233,403 +1228,506 @@
   }
 
   function wrapItToon() {
-      // Check if there is a selected layer
-  if (
-    app.project.activeItem &&
-    app.project.activeItem.selectedLayers.length > 0
-  ) {
-    var comp = app.project.activeItem;
-    var selectedLayer = comp.selectedLayers[0]; // Get the first selected layer
+    // Check if there is a selected layer
+    if (
+      app.project.activeItem &&
+      app.project.activeItem.selectedLayers.length > 0
+    ) {
+      var comp = app.project.activeItem;
+      var selectedLayer = comp.selectedLayers[0]; // Get the first selected layer
 
-    // Get the layer's content bounding box
-    var layerRect = selectedLayer.sourceRectAtTime(comp.time, false);
+      // Get the layer's content bounding box
+      var layerRect = selectedLayer.sourceRectAtTime(comp.time, false);
 
-    // Get the current layer's position
-    var layerPos = selectedLayer.position.value;
+      // Get the current layer's position
+      var layerPos = selectedLayer.position.value;
 
-    // Calculate the center of the content
-    var anchorX = layerRect.left + layerRect.width / 2;
-    var anchorY = layerRect.top + layerRect.height / 2;
+      // Calculate the center of the content
+      var anchorX = layerRect.left + layerRect.width / 2;
+      var anchorY = layerRect.top + layerRect.height / 2;
 
-    // Set the anchor point to the center of the content
-    selectedLayer.anchorPoint.setValue([anchorX, anchorY]);
+      // Set the anchor point to the center of the content
+      selectedLayer.anchorPoint.setValue([anchorX, anchorY]);
 
-    // Adjust the layer's position to compensate for the anchor point change
-    var deltaX = anchorX - selectedLayer.anchorPoint.value[0];
-    var deltaY = anchorY - selectedLayer.anchorPoint.value[1];
+      // Adjust the layer's position to compensate for the anchor point change
+      var deltaX = anchorX - selectedLayer.anchorPoint.value[0];
+      var deltaY = anchorY - selectedLayer.anchorPoint.value[1];
 
-    //check if the layer has a keyframe in position property
-    if (selectedLayer.property("Position").numKeys > 0) {
-        selectedLayer.position.setValueAtTime(
-            comp.time,
-            [
-                layerPos[0] + deltaX,
-                layerPos[1] + deltaY,
-            ]
-            );
-    }else{
-    selectedLayer.position.setValue([
-      layerPos[0] + deltaX,
-      layerPos[1] + deltaY,
-    ]);
-}
+      //check if the layer has a keyframe in position property
+      if (selectedLayer.property("Position").numKeys > 0) {
+        selectedLayer.position.setValueAtTime(comp.time, [
+          layerPos[0] + deltaX,
+          layerPos[1] + deltaY,
+        ]);
+      } else {
+        selectedLayer.position.setValue([
+          layerPos[0] + deltaX,
+          layerPos[1] + deltaY,
+        ]);
+      }
 
-    // Get the dimensions of the selected layer
-    var layerWidth = layerRect.width;
-    var layerHeight = layerRect.height;
-    var layerPos = selectedLayer.position.value;
+      // Get the dimensions of the selected layer
+      var layerWidth = layerRect.width;
+      var layerHeight = layerRect.height;
+      var layerPos = selectedLayer.position.value;
 
-    // Add a shape layer for the background box
-    var shapeLayer = comp.layers.addShape();
-    shapeLayer.name = selectedLayer.name + "_background";
+      // Add a shape layer for the background box
+      var shapeLayer = comp.layers.addShape();
+      shapeLayer.name = selectedLayer.name + "_background";
 
-    // Create a rectangle path
-    var rectGroup = shapeLayer
-      .property("Contents")
-      .addProperty("ADBE Vector Group");
-    var rectPath = rectGroup
-      .property("Contents")
-      .addProperty("ADBE Vector Shape - Rect");
+      // Create a rectangle path
+      var rectGroup = shapeLayer
+        .property("Contents")
+        .addProperty("ADBE Vector Group");
+      var rectPath = rectGroup
+        .property("Contents")
+        .addProperty("ADBE Vector Shape - Rect");
 
-    // Set rectangle size (with a margin)
-    var margin = 50;
-    rectPath
-      .property("Size")
-      .setValue([layerWidth + margin * 2, layerHeight + margin * 2]);
+      // Set rectangle size (with a margin)
+      var margin = 50;
+      rectPath
+        .property("Size")
+        .setValue([layerWidth + margin * 2, layerHeight + margin * 2]);
 
-    // Set position behind the selected layer
-    shapeLayer.property("Position").setValue([layerPos[0], layerPos[1]]);
+      // Set position behind the selected layer
+      shapeLayer.property("Position").setValue([layerPos[0], layerPos[1]]);
 
-    // Add rounded corners
-    var roundedCorners = rectGroup
-      .property("Contents")
-      .addProperty("ADBE Vector Filter - RC");
-    roundedCorners.property("Radius").setValue(30); // Adjust corner radius as needed
+      // Add rounded corners
+      var roundedCorners = rectGroup
+        .property("Contents")
+        .addProperty("ADBE Vector Filter - RC");
+      roundedCorners.property("Radius").setValue(30); // Adjust corner radius as needed
 
-    // Add fill color
-    var fill = rectGroup
-      .property("Contents")
-      .addProperty("ADBE Vector Graphic - Fill");
-    fill.property("Color").setValue([1, 1, 1]); // Adjust fill color as needed
+      // Add fill color
+      var fill = rectGroup
+        .property("Contents")
+        .addProperty("ADBE Vector Graphic - Fill");
+      fill.property("Color").setValue([1, 1, 1]); // Adjust fill color as needed
 
-    // Add stroke (outline)
-    var stroke = rectGroup
-      .property("Contents")
-      .addProperty("ADBE Vector Graphic - Stroke");
-    stroke.property("Color").setValue([0, 0, 0]); // Adjust stroke color as needed
-    stroke.property("Stroke Width").setValue(20); // Adjust stroke width as needed
+      // Add stroke (outline)
+      var stroke = rectGroup
+        .property("Contents")
+        .addProperty("ADBE Vector Graphic - Stroke");
+      stroke.property("Color").setValue([0, 0, 0]); // Adjust stroke color as needed
+      stroke.property("Stroke Width").setValue(20); // Adjust stroke width as needed
 
-    // Add shadow Layer
-    var shadowLayer = comp.layers.addShape();
-    shadowLayer.name = selectedLayer.name + "_shadow";
-    shadowLayer.moveAfter(shapeLayer);
+      // Add shadow Layer
+      var shadowLayer = comp.layers.addShape();
+      shadowLayer.name = selectedLayer.name + "_shadow";
+      shadowLayer.moveAfter(shapeLayer);
 
-    // Create a rectangle path for the shadow
-    var shadowRectGroup = shadowLayer
-      .property("Contents")
-      .addProperty("ADBE Vector Group");
-    var shadowRectPath = shadowRectGroup
-      .property("Contents")
-      .addProperty("ADBE Vector Shape - Rect");
+      // Create a rectangle path for the shadow
+      var shadowRectGroup = shadowLayer
+        .property("Contents")
+        .addProperty("ADBE Vector Group");
+      var shadowRectPath = shadowRectGroup
+        .property("Contents")
+        .addProperty("ADBE Vector Shape - Rect");
 
-    // Set rectangle size (with a margin)
-    shadowRectPath
-      .property("Size")
-      .setValue([layerWidth + margin * 2, layerHeight + margin * 2]);
+      // Set rectangle size (with a margin)
+      shadowRectPath
+        .property("Size")
+        .setValue([layerWidth + margin * 2, layerHeight + margin * 2]);
 
-    // Set position behind the shape layer and move 30
-    shadowLayer.property("Position").setValue([layerPos[0] + 30, layerPos[1] + 30]);
+      // Set position behind the shape layer and move 30
+      shadowLayer
+        .property("Position")
+        .setValue([layerPos[0] + 30, layerPos[1] + 30]);
 
-    // Add rounded corners
-    var shadowRoundedCorners = shadowRectGroup
-      .property("Contents")
-      .addProperty("ADBE Vector Filter - RC");
-    shadowRoundedCorners.property("Radius").setValue(30); // Adjust corner radius as needed
+      // Add rounded corners
+      var shadowRoundedCorners = shadowRectGroup
+        .property("Contents")
+        .addProperty("ADBE Vector Filter - RC");
+      shadowRoundedCorners.property("Radius").setValue(30); // Adjust corner radius as needed
 
-    // Add fill color
-    var shadowFill = shadowRectGroup
-      .property("Contents")
-      .addProperty("ADBE Vector Graphic - Fill");
-    shadowFill.property("Color").setValue([0, 0, 0]); // Adjust fill color as needed
+      // Add fill color
+      var shadowFill = shadowRectGroup
+        .property("Contents")
+        .addProperty("ADBE Vector Graphic - Fill");
+      shadowFill.property("Color").setValue([0, 0, 0]); // Adjust fill color as needed
 
+      //check if the threeDLayer property is True on the selected layer
+      if (selectedLayer.threeDLayer) {
+        // Set the shape layer to be a 3D layer
+        shapeLayer.threeDLayer = true;
 
+        // Set the shadow layer to be a 3D layer
+        shadowLayer.threeDLayer = true;
 
-
-    //check if the threeDLayer property is True on the selected layer
-    if (selectedLayer.threeDLayer) {
-      // Set the shape layer to be a 3D layer
-      shapeLayer.threeDLayer = true;
-
-      // Set the shadow layer to be a 3D layer
-      shadowLayer.threeDLayer = true;
-
-      //check if the selected layer has a keyframe in orientation property
-      if(selectedLayer.property("Orientation").numKeys > 0){
-        // copy the orientation keyframes to the shape
-        for (var i = 1; i <= selectedLayer.property("Orientation").numKeys; i++) {
-          var keyTime = selectedLayer.property("Orientation").keyTime(i);
-          var keyValue = selectedLayer.property("Orientation").keyValue(i);
-          shapeLayer.property("Orientation").setValueAtTime(keyTime, keyValue);
-          shadowLayer.property("Orientation").setValueAtTime(keyTime, keyValue);
+        //check if the selected layer has a keyframe in orientation property
+        if (selectedLayer.property("Orientation").numKeys > 0) {
+          // copy the orientation keyframes to the shape
+          for (
+            var i = 1;
+            i <= selectedLayer.property("Orientation").numKeys;
+            i++
+          ) {
+            var keyTime = selectedLayer.property("Orientation").keyTime(i);
+            var keyValue = selectedLayer.property("Orientation").keyValue(i);
+            shapeLayer
+              .property("Orientation")
+              .setValueAtTime(keyTime, keyValue);
+            shadowLayer
+              .property("Orientation")
+              .setValueAtTime(keyTime, keyValue);
+          }
+        } else {
+          var orient = selectedLayer.property("Orientation").value;
+          shapeLayer.property("Orientation").setValue(orient);
+          shadowLayer.property("Orientation").setValue(orient);
         }
-        }else{
+      }
 
-      var orient = selectedLayer.property("Orientation").value
-      shapeLayer.property("Orientation").setValue(orient);
-      shadowLayer.property("Orientation").setValue(orient);
-        }
-    }
+      // Send the shape layer behind the selected layer
+      shapeLayer.moveAfter(selectedLayer);
+      shadowLayer.moveAfter(shapeLayer);
 
-    // Send the shape layer behind the selected layer
-    shapeLayer.moveAfter(selectedLayer);
-    shadowLayer.moveAfter(shapeLayer);
+      // check if there is any keyframe on the selected layer in scale, position, rotation, opacity property, if so, copy the keyframes to the shape layer
+      var properties = ["Scale", "Position", "Rotation"];
+      for (var i = 0; i < properties.length; i++) {
+        var property = properties[i];
+        var selectedLayerProperty = selectedLayer.property(property);
+        var shapeLayerProperty = shapeLayer.property(property);
+        var shadowLayerProperty = shadowLayer.property(property);
+        if (selectedLayerProperty.numKeys > 0) {
+          for (var j = 1; j <= selectedLayerProperty.numKeys; j++) {
+            var keyTime = selectedLayerProperty.keyTime(j);
+            var keyValue = selectedLayerProperty.keyValue(j);
+            shapeLayerProperty.setValueAtTime(keyTime, keyValue);
 
-    // check if there is any keyframe on the selected layer in scale, position, rotation, opacity property, if so, copy the keyframes to the shape layer
-    var properties = ["Scale", "Position", "Rotation"];
-    for (var i = 0; i < properties.length; i++) {
-      var property = properties[i];
-      var selectedLayerProperty = selectedLayer.property(property);
-      var shapeLayerProperty = shapeLayer.property(property);
-      var shadowLayerProperty = shadowLayer.property(property);
-      if (selectedLayerProperty.numKeys > 0) {
-        for (var j = 1; j <= selectedLayerProperty.numKeys; j++) {
-          var keyTime = selectedLayerProperty.keyTime(j);
-          var keyValue = selectedLayerProperty.keyValue(j);
-          shapeLayerProperty.setValueAtTime(keyTime, keyValue);
+            if (property === "Position") {
+              // Adjust keyValue for x, y by adding 30 each
+              keyValue[0] += 30; // x coordinate
+              keyValue[1] += 30; // y coordinate
+            }
+            shadowLayerProperty.setValueAtTime(keyTime, keyValue);
+          }
+        } else {
+          shapeLayerProperty.setValue(selectedLayerProperty.value);
 
+          var keyValue = selectedLayerProperty.value;
           if (property === "Position") {
             // Adjust keyValue for x, y by adding 30 each
             keyValue[0] += 30; // x coordinate
             keyValue[1] += 30; // y coordinate
           }
-          shadowLayerProperty.setValueAtTime(keyTime, keyValue);
+          shadowLayerProperty.setValue(keyValue);
         }
-      }else{
-        shapeLayerProperty.setValue(selectedLayerProperty.value);
-
-        var keyValue = selectedLayerProperty.value;
-        if (property === "Position") {
-          // Adjust keyValue for x, y by adding 30 each
-          keyValue[0] += 30; // x coordinate
-          keyValue[1] += 30; // y coordinate
-        }
-        shadowLayerProperty.setValue(keyValue);
       }
+
+      // Select both layers
+      selectedLayer.selected = true;
+      shapeLayer.selected = true;
+      shadowLayer.selected = true;
+
+      // Precompose the selected layers
+      var precomp = comp.layers.precompose(
+        [selectedLayer.index, shapeLayer.index, shadowLayer.index],
+        selectedLayer.name + "_group",
+        true
+      );
+
+      alert("Background shape with rounded corners and shadow created!");
+    } else {
+      alert("Please select a layer first.");
     }
-
-    // Select both layers
-    selectedLayer.selected = true;
-    shapeLayer.selected = true;
-    shadowLayer.selected = true;
-
-    // Precompose the selected layers
-    var precomp = comp.layers.precompose(
-      [selectedLayer.index, shapeLayer.index, shadowLayer.index],
-      selectedLayer.name + "_group",
-      true
-    );
-
-    alert("Background shape with rounded corners and shadow created!");
-  } else {
-    alert("Please select a layer first.");
-  }
   }
 
   function camera3D() {
     var comp = app.project.activeItem; // Get the active composition
-    if (comp && comp instanceof CompItem) { // Check if there is an active composition
-        var selectedLayers = comp.selectedLayers; // Get the selected layers in the comp
-        if (selectedLayers.length > 1) { // Check if more than one layer is selected
-            app.beginUndoGroup("Fit Layers, Set 3D Z Position, and Add Camera"); // Begin undo group
+    if (comp && comp instanceof CompItem) {
+      // Check if there is an active composition
+      var selectedLayers = comp.selectedLayers; // Get the selected layers in the comp
+      if (selectedLayers.length > 1) {
+        // Check if more than one layer is selected
+        app.beginUndoGroup("Fit Layers, Set 3D Z Position, and Add Camera"); // Begin undo group
 
-            var compWidth = comp.width; // Get composition width
-            var compHeight = comp.height; // Get composition height
+        var compWidth = comp.width; // Get composition width
+        var compHeight = comp.height; // Get composition height
 
-            // First, scale each layer to fit the composition frame without changing aspect ratio
-            for (var i = 0; i < selectedLayers.length; i++) {
-                var layer = selectedLayers[i];
-                
-                // Enable 3D layer if not already
-                if (!layer.threeDLayer) {
-                    layer.threeDLayer = true; // Enable 3D for the layer
-                }
-
-                var layerWidth = layer.width;
-                var layerHeight = layer.height;
-                var scaleFactor = Math.min(compWidth / layerWidth, compHeight / layerHeight)*1.5; // 1.5 times to comp
-
-                layer.property("Scale").setValue([scaleFactor * 100, scaleFactor * 100, 100]); // Apply uniform scale
-            }
-
-            // Now, apply Z positioning for 3D layers
-            var numLayers = selectedLayers.length;
-            var totalDistance = (numLayers - 1) * 500; // Calculate total Z distance based on layers count
-            var startZ = -totalDistance / 2; // Starting Z position
-
-            for (var i = 0; i < numLayers; i++) {
-                var layer = selectedLayers[i];
-                var currentPosition = layer.property("Position").value;
-                var newPosition = [currentPosition[0], currentPosition[1], startZ + (i * 500)]; // Set Z position with equal distance
-                layer.property("Position").setValue(newPosition); // Apply new Z position
-            }
-
-            // Add Camera at the top of the layer stack
-            var cameraName = "3D Camera";
-            var camera = comp.layers.addCamera(cameraName, [compWidth / 2, compHeight / 2]); // Add a camera at the center of the comp
-            camera.moveToBeginning(); // Move the camera to the top of the layer stack
-
-            // Set camera depth of field properties
-            camera.property("Camera Options").property("depthOfField").setValue(true); // Enable depth of field
-            camera.property("Camera Options").property("aperture").setValue(2000); // Set aperture
-
-            // get default camera zoom value
-            var zoom  = camera.property("Zoom").value;
-
-            // Camera position set to the center of the comp and same distance as the zoomed out layers
-            var cameraPosition = camera.property("Position").setValue([compWidth / 2, compHeight * 0.95, -zoom]);
-
-            // add keyframes to camera position
-            camera.property("Position").setValueAtTime(comp.time, [compWidth / 2, compHeight * 0.95, -zoom]);
-            camera.property("Position").setValueAtTime(comp.time + 5, [compWidth / 2, compHeight * 0.05, -zoom]);
-
-            // Animate focus distance to match Z positions of the layers
-            var focusDistance = camera.property("Camera Options").property("focusDistance");
-            
-            var easeIn = new KeyframeEase(0, 70); // Influence: 50%
-            var easeOut = new KeyframeEase(0, 70); // Influence: 50%
-
-            for (var i = 0; i < numLayers; i++) {
-                var layer = selectedLayers[i];
-                var zPosition = layer.property("Position").value[2]; // Get Z position of the layer
-
-                var keyTime = comp.time + i; // Set keyframes spaced by 1 second apart
-                focusDistance.setValueAtTime(keyTime, zoom - zPosition); // Set focus distance keyframe
-                // add ease to keyframes
-                focusDistance.setTemporalEaseAtKey(i+1, [easeIn], [easeOut]);
-            }
-
-            // add zoom keyframes
-            camera.property("Zoom").setValueAtTime(comp.time, zoom + totalDistance /2);
-            camera.property("Zoom").setValueAtTime(comp.time + numLayers-1, zoom - totalDistance /2);
-
-            // add ease to keyframes
-            camera.property("Zoom").setTemporalEaseAtKey(1, [easeIn], [easeOut]);
-            camera.property("Zoom").setTemporalEaseAtKey(2, [easeIn], [easeOut]);
-
-
-            
-
-            app.endUndoGroup(); // End undo group
-        } else {
-            alert("Please select more than one layer to animate.");
-        }
-    } else {
-        alert("Please select a composition.");
-    }
-}
-
-function makeSignsSmaller() {
-  var comp = app.project.activeItem; // Get the active composition
-if (comp && comp instanceof CompItem) { // Check if there is an active composition
-  var selectedLayers = comp.selectedLayers; // Get the selected layers in the comp
-  if (selectedLayers.length > 0) {
-      app.beginUndoGroup("Move Special Characters to New Layer"); // Begin undo group
-
-      for (var i = 0; i < selectedLayers.length; i++) {
+        // First, scale each layer to fit the composition frame without changing aspect ratio
+        for (var i = 0; i < selectedLayers.length; i++) {
           var layer = selectedLayers[i];
-          
-          if (layer instanceof TextLayer) { // Check if the layer is a text layer
-              var textProp = layer.property("Source Text");
-              var textDocument = textProp.value; // Get the current text document
-              var originalText = textDocument.text; // Get the text from the text document
-              
-              var hasDollar = (originalText.indexOf('$') === 0); // Check if the text starts with '$'
-              var hasPercent = (originalText.lastIndexOf('%') === originalText.length - 1);  // Check if the text ends with '%'
 
-              if (hasDollar || hasPercent) {
-                  var specialChar = ''; // The character we'll move
-                  var newText = originalText; // The new text without special characters
-
-                  // Determine if we need to move a '$' or a '%'
-                  if (hasDollar) {
-                      specialChar = '$';
-                      newText = originalText.substring(1); // Remove '$' from the text
-                  } else if (hasPercent) {
-                      specialChar = '%';
-                      newText = originalText.slice(0, -1); // Remove '%' from the text
-                  }
-
-                  // Update the original layer text by removing the special character
-                  textDocument.text = newText;
-                  textProp.setValue(textDocument);
-
-                  // Duplicate the original layer
-                  var newLayer = layer.duplicate();
-
-                  // Modify the duplicated layer's text to only contain the special character
-                  var newLayerTextProp = newLayer.property("Source Text");
-                  var newLayerTextDocument = newLayerTextProp.value;
-                  newLayerTextDocument.text = specialChar;
-                  newLayerTextProp.setValue(newLayerTextDocument);
-
-                  // Scale the duplicated layer to 70% of the original size
-                  var originalScale = layer.property("Scale").value;
-                  newLayer.property("Scale").setValue([originalScale[0] * 0.7, originalScale[1] * 0.7]);
-
-              }
-
-              //get position of new composition from the original layer.
-              var originalPosition = layer.property("Position").value;
-              var originalLayerWidth = layer.sourceRectAtTime(comp.time, false).width;
-              var originalLayerHeight = layer.sourceRectAtTime(comp.time, false).height;
-              var newLayerWidth = newLayer.sourceRectAtTime(comp.time, false).width;
-              //create a new composition.
-              var newComp = app.project.items.addComp("adjusted_"+originalText, Math.round(originalLayerWidth*2), Math.round(originalLayerHeight*2), comp.pixelAspect, comp.duration, comp.frameRate);
-
-              
-              // Set the new layer position
-              if (hasDollar) {
-                  layer.property("Position").setValue([newComp.width/2+newLayerWidth/2, newComp.height/2]);
-                  // Place the new layer on the left of the original text
-                  newLayer.property("Position").setValue([
-                      newComp.width/2 - originalLayerWidth / 2, 
-                      newComp.height/2
-                  ]);
-              } else if (hasPercent) {
-                  layer.property("Position").setValue([newComp.width/2-newLayerWidth/2, newComp.height/2]);
-                  // Place the new layer on the right of the original text
-                  newLayer.property("Position").setValue([
-                      newComp.width/2 + originalLayerWidth / 2 , 
-                      newComp.height/2
-                  ]);
-              }
-
-              layer.copyToComp(newComp);
-              newLayer.copyToComp(newComp);
-
-              //set the position of new composition with original position.
-              var newCompLayer = comp.layers.add(newComp);
-              newCompLayer.property("Position").setValue(originalPosition);
-
-              //delete the original layer and new layer.
-              layer.remove();
-              newLayer.remove();
-
-
-
-              
+          // Enable 3D layer if not already
+          if (!layer.threeDLayer) {
+            layer.threeDLayer = true; // Enable 3D for the layer
           }
+
+          var layerWidth = layer.width;
+          var layerHeight = layer.height;
+          var scaleFactor =
+            Math.min(compWidth / layerWidth, compHeight / layerHeight) * 1.5; // 1.5 times to comp
+
+          layer
+            .property("Scale")
+            .setValue([scaleFactor * 100, scaleFactor * 100, 100]); // Apply uniform scale
+        }
+
+        // Now, apply Z positioning for 3D layers
+        var numLayers = selectedLayers.length;
+        var totalDistance = (numLayers - 1) * 500; // Calculate total Z distance based on layers count
+        var startZ = -totalDistance / 2; // Starting Z position
+
+        for (var i = 0; i < numLayers; i++) {
+          var layer = selectedLayers[i];
+          var currentPosition = layer.property("Position").value;
+          var newPosition = [
+            currentPosition[0],
+            currentPosition[1],
+            startZ + i * 500,
+          ]; // Set Z position with equal distance
+          layer.property("Position").setValue(newPosition); // Apply new Z position
+        }
+
+        // Add Camera at the top of the layer stack
+        var cameraName = "3D Camera";
+        var camera = comp.layers.addCamera(cameraName, [
+          compWidth / 2,
+          compHeight / 2,
+        ]); // Add a camera at the center of the comp
+        camera.moveToBeginning(); // Move the camera to the top of the layer stack
+
+        // Set camera depth of field properties
+        camera
+          .property("Camera Options")
+          .property("depthOfField")
+          .setValue(true); // Enable depth of field
+        camera.property("Camera Options").property("aperture").setValue(2000); // Set aperture
+
+        // get default camera zoom value
+        var zoom = camera.property("Zoom").value;
+
+        // Camera position set to the center of the comp and same distance as the zoomed out layers
+        var cameraPosition = camera
+          .property("Position")
+          .setValue([compWidth / 2, compHeight * 0.95, -zoom]);
+
+        // add keyframes to camera position
+        camera
+          .property("Position")
+          .setValueAtTime(comp.time, [compWidth / 2, compHeight * 0.95, -zoom]);
+        camera
+          .property("Position")
+          .setValueAtTime(comp.time + 5, [
+            compWidth / 2,
+            compHeight * 0.05,
+            -zoom,
+          ]);
+
+        // Animate focus distance to match Z positions of the layers
+        var focusDistance = camera
+          .property("Camera Options")
+          .property("focusDistance");
+
+        var easeIn = new KeyframeEase(0, 70); // Influence: 50%
+        var easeOut = new KeyframeEase(0, 70); // Influence: 50%
+
+        for (var i = 0; i < numLayers; i++) {
+          var layer = selectedLayers[i];
+          var zPosition = layer.property("Position").value[2]; // Get Z position of the layer
+
+          var keyTime = comp.time + i; // Set keyframes spaced by 1 second apart
+          focusDistance.setValueAtTime(keyTime, zoom - zPosition); // Set focus distance keyframe
+          // add ease to keyframes
+          focusDistance.setTemporalEaseAtKey(i + 1, [easeIn], [easeOut]);
+        }
+
+        // add zoom keyframes
+        camera
+          .property("Zoom")
+          .setValueAtTime(comp.time, zoom + totalDistance / 2);
+        camera
+          .property("Zoom")
+          .setValueAtTime(comp.time + numLayers - 1, zoom - totalDistance / 2);
+
+        // add ease to keyframes
+        camera.property("Zoom").setTemporalEaseAtKey(1, [easeIn], [easeOut]);
+        camera.property("Zoom").setTemporalEaseAtKey(2, [easeIn], [easeOut]);
+
+        app.endUndoGroup(); // End undo group
+      } else {
+        alert("Please select more than one layer to animate.");
       }
-
-      app.endUndoGroup(); // End undo group
-  } else {
-      alert("Please select at least one text layer.");
+    } else {
+      alert("Please select a composition.");
+    }
   }
-} else {
-  alert("Please select a composition.");
-}
-}
 
+  function blur50() {
+    //blur 50% on the selected layer
+    //first check if there is selected layer
+    if (
+      !app.project.activeItem ||
+      !app.project.activeItem.selectedLayers.length
+    ) {
+      alert("Please select a layer");
+      return;
+    }
+    var selectedLayer = app.project.activeItem.selectedLayers;
+    //loop through the selected layers
+    for (var i = 0; i < selectedLayer.length; i++) {
+      var blur = selectedLayer[i]
+        .property("Effects")
+        .addProperty("ADBE Gaussian Blur 2");
+      blur.property("Blurriness").setValue(50); // Adjust blur amount
+    }
+  }
+
+  function shadow() {
+    // check if there is selected layer
+    if (
+      !app.project.activeItem ||
+      !app.project.activeItem.selectedLayers.length
+    ) {
+      alert("Please select a layer");
+      return;
+    }
+
+    //add shadow to the selected layer
+    var selectedLayer = app.project.activeItem.selectedLayers;
+
+    //loop through the selected layers
+    for (var i = 0; i < selectedLayer.length; i++) {
+      var dropShadow = selectedLayer[i]
+        .property("Effects")
+        .addProperty("ADBE Drop Shadow");
+      dropShadow.property("Distance").setValue(18); // Adjust shadow distance
+      dropShadow.property("Direction").setValue(135); // Adjust shadow direction
+      dropShadow.property("Softness").setValue(20); // Adjust shadow softness
+    }
+  }
+
+  function makeSignsSmaller() {
+    var comp = app.project.activeItem; // Get the active composition
+    if (comp && comp instanceof CompItem) {
+      // Check if there is an active composition
+      var selectedLayers = comp.selectedLayers; // Get the selected layers in the comp
+      if (selectedLayers.length > 0) {
+        app.beginUndoGroup("Move Special Characters to New Layer"); // Begin undo group
+
+        for (var i = 0; i < selectedLayers.length; i++) {
+          var layer = selectedLayers[i];
+
+          if (layer instanceof TextLayer) {
+            // Check if the layer is a text layer
+            var textProp = layer.property("Source Text");
+            var textDocument = textProp.value; // Get the current text document
+            var originalText = textDocument.text; // Get the text from the text document
+
+            var hasDollar = originalText.indexOf("$") === 0; // Check if the text starts with '$'
+            var hasPercent =
+              originalText.lastIndexOf("%") === originalText.length - 1; // Check if the text ends with '%'
+
+            if (hasDollar || hasPercent) {
+              var specialChar = ""; // The character we'll move
+              var newText = originalText; // The new text without special characters
+
+              // Determine if we need to move a '$' or a '%'
+              if (hasDollar) {
+                specialChar = "$";
+                newText = originalText.substring(1); // Remove '$' from the text
+              } else if (hasPercent) {
+                specialChar = "%";
+                newText = originalText.slice(0, -1); // Remove '%' from the text
+              }
+
+              // Update the original layer text by removing the special character
+              textDocument.text = newText;
+              textProp.setValue(textDocument);
+
+              // Duplicate the original layer
+              var newLayer = layer.duplicate();
+
+              // Modify the duplicated layer's text to only contain the special character
+              var newLayerTextProp = newLayer.property("Source Text");
+              var newLayerTextDocument = newLayerTextProp.value;
+              newLayerTextDocument.text = specialChar;
+              newLayerTextProp.setValue(newLayerTextDocument);
+
+              // Scale the duplicated layer to 70% of the original size
+              var originalScale = layer.property("Scale").value;
+              newLayer
+                .property("Scale")
+                .setValue([originalScale[0] * 0.7, originalScale[1] * 0.7]);
+            }
+
+            //get position of new composition from the original layer.
+            var originalPosition = layer.property("Position").value;
+            var originalLayerWidth = layer.sourceRectAtTime(
+              comp.time,
+              false
+            ).width;
+            var originalLayerHeight = layer.sourceRectAtTime(
+              comp.time,
+              false
+            ).height;
+            var newLayerWidth = newLayer.sourceRectAtTime(
+              comp.time,
+              false
+            ).width;
+            //create a new composition.
+            var newComp = app.project.items.addComp(
+              "adjusted_" + originalText,
+              Math.round(originalLayerWidth * 2),
+              Math.round(originalLayerHeight * 2),
+              comp.pixelAspect,
+              comp.duration,
+              comp.frameRate
+            );
+
+            // Set the new layer position
+            if (hasDollar) {
+              layer
+                .property("Position")
+                .setValue([
+                  newComp.width / 2 + newLayerWidth / 2,
+                  newComp.height / 2,
+                ]);
+              // Place the new layer on the left of the original text
+              newLayer
+                .property("Position")
+                .setValue([
+                  newComp.width / 2 - originalLayerWidth / 2,
+                  newComp.height / 2,
+                ]);
+            } else if (hasPercent) {
+              layer
+                .property("Position")
+                .setValue([
+                  newComp.width / 2 - newLayerWidth / 2,
+                  newComp.height / 2,
+                ]);
+              // Place the new layer on the right of the original text
+              newLayer
+                .property("Position")
+                .setValue([
+                  newComp.width / 2 + originalLayerWidth / 2,
+                  newComp.height / 2,
+                ]);
+            }
+
+            layer.copyToComp(newComp);
+            newLayer.copyToComp(newComp);
+
+            //set the position of new composition with original position.
+            var newCompLayer = comp.layers.add(newComp);
+            newCompLayer.property("Position").setValue(originalPosition);
+
+            //delete the original layer and new layer.
+            layer.remove();
+            newLayer.remove();
+          }
+        }
+
+        app.endUndoGroup(); // End undo group
+      } else {
+        alert("Please select at least one text layer.");
+      }
+    } else {
+      alert("Please select a composition.");
+    }
+  }
 
   /**
    *  UI for AE-Expressions
@@ -1646,7 +1744,7 @@ if (comp && comp instanceof CompItem) { // Check if there is an active compositi
       thisObj instanceof Panel
         ? thisObj
         : new Window("palette", undefined, undefined, { resizeable: true });
-    dialog.text = "Rainvic's AE Tools V1.0";
+    dialog.text = "Rainvic's AE Tools V1.1";
     dialog.alignChildren = ["center", "top"];
     // fill available space
     dialog.orientation = "column";
@@ -1709,10 +1807,11 @@ if (comp && comp instanceof CompItem) { // Check if there is an active compositi
     });
     divider4.alignment = "fill";
 
-    var threeDButton = tab1.add("button", undefined, undefined, { name: "threeDButton" });
+    var threeDButton = tab1.add("button", undefined, undefined, {
+      name: "threeDButton",
+    });
     threeDButton.text = "3D Camera";
     threeDButton.onClick = camera3D;
-
 
     var wiggleGroup = tab1.add("group", undefined, { name: "wiggleGroup" });
     wiggleGroup.orientation = "row";
@@ -1720,8 +1819,9 @@ if (comp && comp instanceof CompItem) { // Check if there is an active compositi
     wiggleGroup.spacing = 10;
     wiggleGroup.margins = 0;
 
-
-    var button4 = wiggleGroup.add("button", undefined, undefined, { name: "button4" });
+    var button4 = wiggleGroup.add("button", undefined, undefined, {
+      name: "button4",
+    });
     button4.text = "Wiggle!";
     button4.onClick = function () {
       addWiggle(freqOfWiggle.text, ampOfWiggle.text);
@@ -1766,7 +1866,9 @@ if (comp && comp instanceof CompItem) { // Check if there is an active compositi
     ampOfWiggle.preferredSize.width = 50;
 
     // TAB_effects
-    var tabEffects = tpanel1.add("tab", undefined, undefined, { name: "tabEffects" });
+    var tabEffects = tpanel1.add("tab", undefined, undefined, {
+      name: "tabEffects",
+    });
     tabEffects.text = "Effects";
     tabEffects.orientation = "column";
     tabEffects.alignChildren = ["left", "top"];
@@ -1781,12 +1883,30 @@ if (comp && comp instanceof CompItem) { // Check if there is an active compositi
     removeBlackBackground.onClick = removeBlackBG;
 
     // make signs smaller
-    var makeSignsSmallerButton = tabEffects.add("button", undefined, undefined, {
-      name: "makeSignsSmallerButton",
-    });
+    var makeSignsSmallerButton = tabEffects.add(
+      "button",
+      undefined,
+      undefined,
+      {
+        name: "makeSignsSmallerButton",
+      }
+    );
     makeSignsSmallerButton.text = "Small $ %";
     makeSignsSmallerButton.onClick = makeSignsSmaller;
 
+    // blur 50%
+    var blur50Button = tabEffects.add("button", undefined, undefined, {
+      name: "blur50Button",
+    });
+    blur50Button.text = "Blur 50%";
+    blur50Button.onClick = blur50;
+
+    // add shadow
+    var shadowButton = tabEffects.add("button", undefined, undefined, {
+      name: "shadowButton",
+    });
+    shadowButton.text = "Shadow";
+    shadowButton.onClick = shadow;
 
     // TAB2
     // ====
@@ -1971,7 +2091,13 @@ if (comp && comp instanceof CompItem) { // Check if there is an active compositi
         parseInt(yStartEdittext.text),
         parseInt(yEndEdittext.text),
         parseInt(yStepEdittext.text),
-        200, 4, 20, [0,0,0], 10, [0,0,0], 300
+        200,
+        4,
+        20,
+        [0, 0, 0],
+        10,
+        [0, 0, 0],
+        300
       );
     };
 
