@@ -918,7 +918,7 @@
         .property("Contents")
         .addProperty("ADBE Vector Graphic - Stroke");
       stroke.property("Color").setValue([0, 0, 0]); // Adjust stroke color as needed
-      stroke.property("Stroke Width").setValue(0.5); // Adjust stroke width as needed
+      stroke.property("Stroke Width").setValue(0.0); // Adjust stroke width as needed
   
       // Add drop shadow effect
       var dropShadow = shapeLayer

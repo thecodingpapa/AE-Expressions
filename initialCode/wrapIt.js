@@ -83,7 +83,7 @@
       .property("Contents")
       .addProperty("ADBE Vector Graphic - Stroke");
     stroke.property("Color").setValue([0, 0, 0]); // Adjust stroke color as needed
-    stroke.property("Stroke Width").setValue(0.5); // Adjust stroke width as needed
+    stroke.property("Stroke Width").setValue(0.0); // Adjust stroke width as needed
 
     // Add drop shadow effect
     var dropShadow = shapeLayer
@@ -145,7 +145,7 @@
       true
     );
 
-    alert("Background shape with rounded corners and shadow created!");
+    showSoftNotification("Wrapped the selected layer successfully!", 2000);
   } else {
     alert("Please select a layer first.");
   }
