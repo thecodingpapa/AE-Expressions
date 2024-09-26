@@ -89,10 +89,10 @@
       var dropShadow = shapeLayer
         .property("Effects")
         .addProperty("ADBE Drop Shadow");
-      dropShadow.property("Opacity").setValue(70); // Adjust shadow opacity
-      dropShadow.property("Distance").setValue(18); // Adjust shadow distance
+      dropShadow.property("Opacity").setValue(80); // Adjust shadow opacity
+      dropShadow.property("Softness").setValue(7); // Adjust shadow distance
       dropShadow.property("Direction").setValue(135); // Adjust shadow direction
-      dropShadow.property("Softness").setValue(20); // Adjust shadow softness
+      dropShadow.property("Softness").setValue(7); // Adjust shadow softness
   
       //check if the threeDLayer property is True on the selected layer
       if (selectedLayer.threeDLayer) {

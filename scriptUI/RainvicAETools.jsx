@@ -913,10 +913,10 @@
       var dropShadow = shapeLayer
         .property("Effects")
         .addProperty("ADBE Drop Shadow");
-      dropShadow.property("Opacity").setValue(70); // Adjust shadow opacity
-      dropShadow.property("Distance").setValue(18); // Adjust shadow distance
+      dropShadow.property("Opacity").setValue(80); // Adjust shadow opacity
+      dropShadow.property("Softness").setValue(7); // Adjust shadow distance
       dropShadow.property("Direction").setValue(135); // Adjust shadow direction
-      dropShadow.property("Softness").setValue(20); // Adjust shadow softness
+      dropShadow.property("Softness").setValue(7); // Adjust shadow softness
 
       //check if the threeDLayer property is True on the selected layer
       if (selectedLayer.threeDLayer) {
@@ -1592,9 +1592,10 @@
       var dropShadow = selectedLayer[i]
         .property("Effects")
         .addProperty("ADBE Drop Shadow");
-      dropShadow.property("Distance").setValue(18); // Adjust shadow distance
+      dropShadow.property("Opacity").setValue(80); // Adjust shadow opacity
+      dropShadow.property("Softness").setValue(7); // Adjust shadow distance
       dropShadow.property("Direction").setValue(135); // Adjust shadow direction
-      dropShadow.property("Softness").setValue(20); // Adjust shadow softness
+      dropShadow.property("Softness").setValue(7); // Adjust shadow softness
     }
   }
 
@@ -1744,7 +1745,7 @@
       thisObj instanceof Panel
         ? thisObj
         : new Window("palette", undefined, undefined, { resizeable: true });
-    dialog.text = "Rainvic's AE Tools V1.1";
+    dialog.text = "Rainvic's AE Tools V1.2";
     dialog.alignChildren = ["center", "top"];
     // fill available space
     dialog.orientation = "column";
