@@ -833,149 +833,154 @@
       app.project.activeItem.selectedLayers.length > 0
     ) {
       var comp = app.project.activeItem;
-      var selectedLayer = comp.selectedLayers[0]; // Get the first selected layer
+      var selectedLayers = comp.selectedLayers; // Get the first selected layer
 
-      // Get the layer's content bounding box
-      var layerRect = selectedLayer.sourceRectAtTime(comp.time, false);
+      // Loop through selected layers
+      for (var i = 0; i < selectedLayers.length; i++) {
+        var selectedLayer = selectedLayers[i];
 
-      // Get the current layer's position
-      var layerPos = selectedLayer.position.value;
+        // Get the layer's content bounding box
+        var layerRect = selectedLayer.sourceRectAtTime(comp.time, false);
 
-      // Calculate the center of the content
-      var anchorX = layerRect.left + layerRect.width / 2;
-      var anchorY = layerRect.top + layerRect.height / 2;
+        // Get the current layer's position
+        var layerPos = selectedLayer.position.value;
 
-      // Set the anchor point to the center of the content
-      selectedLayer.anchorPoint.setValue([anchorX, anchorY]);
+        // Calculate the center of the content
+        var anchorX = layerRect.left + layerRect.width / 2;
+        var anchorY = layerRect.top + layerRect.height / 2;
 
-      // Adjust the layer's position to compensate for the anchor point change
-      var deltaX = anchorX - selectedLayer.anchorPoint.value[0];
-      var deltaY = anchorY - selectedLayer.anchorPoint.value[1];
+        // Set the anchor point to the center of the content
+        selectedLayer.anchorPoint.setValue([anchorX, anchorY]);
 
-      //check if the layer has a keyframe in position property
-      if (selectedLayer.property("Position").numKeys > 0) {
-        selectedLayer.position.setValueAtTime(comp.time, [
-          layerPos[0] + deltaX,
-          layerPos[1] + deltaY,
-        ]);
-      } else {
-        selectedLayer.position.setValue([
-          layerPos[0] + deltaX,
-          layerPos[1] + deltaY,
-        ]);
-      }
+        // Adjust the layer's position to compensate for the anchor point change
+        var deltaX = anchorX - selectedLayer.anchorPoint.value[0];
+        var deltaY = anchorY - selectedLayer.anchorPoint.value[1];
 
-      // Get the dimensions of the selected layer
-      var layerWidth = layerRect.width;
-      var layerHeight = layerRect.height;
-      var layerPos = selectedLayer.position.value;
-
-      // Add a shape layer for the background box
-      var shapeLayer = comp.layers.addShape();
-      shapeLayer.name = selectedLayer.name + "_background";
-
-      // Create a rectangle path
-      var rectGroup = shapeLayer
-        .property("Contents")
-        .addProperty("ADBE Vector Group");
-      var rectPath = rectGroup
-        .property("Contents")
-        .addProperty("ADBE Vector Shape - Rect");
-
-      // Set rectangle size (with a margin)
-      var margin = 20;
-      rectPath
-        .property("Size")
-        .setValue([layerWidth + margin * 2, layerHeight + margin * 2]);
-
-      // Set position behind the selected layer
-      shapeLayer.property("Position").setValue([layerPos[0], layerPos[1]]);
-
-      // Add rounded corners
-      var roundedCorners = rectGroup
-        .property("Contents")
-        .addProperty("ADBE Vector Filter - RC");
-      roundedCorners.property("Radius").setValue(20); // Adjust corner radius as needed
-
-      // Add fill color
-      var fill = rectGroup
-        .property("Contents")
-        .addProperty("ADBE Vector Graphic - Fill");
-      fill.property("Color").setValue([1, 1, 1]); // Adjust fill color as needed
-
-      // Add stroke (outline)
-      var stroke = rectGroup
-        .property("Contents")
-        .addProperty("ADBE Vector Graphic - Stroke");
-      stroke.property("Color").setValue([0, 0, 0]); // Adjust stroke color as needed
-      stroke.property("Stroke Width").setValue(0.0); // Adjust stroke width as needed
-
-      // Add drop shadow effect
-      var dropShadow = shapeLayer
-        .property("Effects")
-        .addProperty("ADBE Drop Shadow");
-      dropShadow.property("Opacity").setValue(80); // Adjust shadow opacity
-      dropShadow.property("Softness").setValue(7); // Adjust shadow distance
-      dropShadow.property("Direction").setValue(135); // Adjust shadow direction
-      dropShadow.property("Softness").setValue(7); // Adjust shadow softness
-
-      //check if the threeDLayer property is True on the selected layer
-      if (selectedLayer.threeDLayer) {
-        // Set the shape layer to be a 3D layer
-        shapeLayer.threeDLayer = true;
-
-        //check if the selected layer has a keyframe in orientation property
-        if (selectedLayer.property("Orientation").numKeys > 0) {
-          // copy the orientation keyframes to the shape
-          for (
-            var i = 1;
-            i <= selectedLayer.property("Orientation").numKeys;
-            i++
-          ) {
-            var keyTime = selectedLayer.property("Orientation").keyTime(i);
-            var keyValue = selectedLayer.property("Orientation").keyValue(i);
-            shapeLayer
-              .property("Orientation")
-              .setValueAtTime(keyTime, keyValue);
-          }
+        //check if the layer has a keyframe in position property
+        if (selectedLayer.property("Position").numKeys > 0) {
+          selectedLayer.position.setValueAtTime(comp.time, [
+            layerPos[0] + deltaX,
+            layerPos[1] + deltaY,
+          ]);
         } else {
-          var orient = selectedLayer.property("Orientation").value;
-          shapeLayer.property("Orientation").setValue(orient);
+          selectedLayer.position.setValue([
+            layerPos[0] + deltaX,
+            layerPos[1] + deltaY,
+          ]);
         }
-      }
 
-      // Send the shape layer behind the selected layer
-      shapeLayer.moveAfter(selectedLayer);
+        // Get the dimensions of the selected layer
+        var layerWidth = layerRect.width;
+        var layerHeight = layerRect.height;
+        var layerPos = selectedLayer.position.value;
 
-      // check if there is any keyframe on the selected layer in scale, position, rotation, opacity property, if so, copy the keyframes to the shape layer
-      var properties = ["Scale", "Position", "Rotation", "Opacity"];
-      for (var i = 0; i < properties.length; i++) {
-        var property = properties[i];
-        var selectedLayerProperty = selectedLayer.property(property);
-        var shapeLayerProperty = shapeLayer.property(property);
-        if (selectedLayerProperty.numKeys > 0) {
-          for (var j = 1; j <= selectedLayerProperty.numKeys; j++) {
-            var keyTime = selectedLayerProperty.keyTime(j);
-            var keyValue = selectedLayerProperty.keyValue(j);
-            shapeLayerProperty.setValueAtTime(keyTime, keyValue);
+        // Add a shape layer for the background box
+        var shapeLayer = comp.layers.addShape();
+        shapeLayer.name = selectedLayer.name + "_background";
+
+        // Create a rectangle path
+        var rectGroup = shapeLayer
+          .property("Contents")
+          .addProperty("ADBE Vector Group");
+        var rectPath = rectGroup
+          .property("Contents")
+          .addProperty("ADBE Vector Shape - Rect");
+
+        // Set rectangle size (with a margin)
+        var margin = 20;
+        rectPath
+          .property("Size")
+          .setValue([layerWidth + margin * 2, layerHeight + margin * 2]);
+
+        // Set position behind the selected layer
+        shapeLayer.property("Position").setValue([layerPos[0], layerPos[1]]);
+
+        // Add rounded corners
+        var roundedCorners = rectGroup
+          .property("Contents")
+          .addProperty("ADBE Vector Filter - RC");
+        roundedCorners.property("Radius").setValue(20); // Adjust corner radius as needed
+
+        // Add fill color
+        var fill = rectGroup
+          .property("Contents")
+          .addProperty("ADBE Vector Graphic - Fill");
+        fill.property("Color").setValue([1, 1, 1]); // Adjust fill color as needed
+
+        // Add stroke (outline)
+        var stroke = rectGroup
+          .property("Contents")
+          .addProperty("ADBE Vector Graphic - Stroke");
+        stroke.property("Color").setValue([0, 0, 0]); // Adjust stroke color as needed
+        stroke.property("Stroke Width").setValue(0.0); // Adjust stroke width as needed
+
+        // Add drop shadow effect
+        var dropShadow = shapeLayer
+          .property("Effects")
+          .addProperty("ADBE Drop Shadow");
+        dropShadow.property("Opacity").setValue(80); // Adjust shadow opacity
+        dropShadow.property("Softness").setValue(7); // Adjust shadow distance
+        dropShadow.property("Direction").setValue(135); // Adjust shadow direction
+        dropShadow.property("Softness").setValue(7); // Adjust shadow softness
+
+        //check if the threeDLayer property is True on the selected layer
+        if (selectedLayer.threeDLayer) {
+          // Set the shape layer to be a 3D layer
+          shapeLayer.threeDLayer = true;
+
+          //check if the selected layer has a keyframe in orientation property
+          if (selectedLayer.property("Orientation").numKeys > 0) {
+            // copy the orientation keyframes to the shape
+            for (
+              var i = 1;
+              i <= selectedLayer.property("Orientation").numKeys;
+              i++
+            ) {
+              var keyTime = selectedLayer.property("Orientation").keyTime(i);
+              var keyValue = selectedLayer.property("Orientation").keyValue(i);
+              shapeLayer
+                .property("Orientation")
+                .setValueAtTime(keyTime, keyValue);
+            }
+          } else {
+            var orient = selectedLayer.property("Orientation").value;
+            shapeLayer.property("Orientation").setValue(orient);
           }
-        } else {
-          shapeLayerProperty.setValue(selectedLayerProperty.value);
         }
+
+        // Send the shape layer behind the selected layer
+        shapeLayer.moveAfter(selectedLayer);
+
+        // check if there is any keyframe on the selected layer in scale, position, rotation, opacity property, if so, copy the keyframes to the shape layer
+        var properties = ["Scale", "Position", "Rotation", "Opacity"];
+        for (var i = 0; i < properties.length; i++) {
+          var property = properties[i];
+          var selectedLayerProperty = selectedLayer.property(property);
+          var shapeLayerProperty = shapeLayer.property(property);
+          if (selectedLayerProperty.numKeys > 0) {
+            for (var j = 1; j <= selectedLayerProperty.numKeys; j++) {
+              var keyTime = selectedLayerProperty.keyTime(j);
+              var keyValue = selectedLayerProperty.keyValue(j);
+              shapeLayerProperty.setValueAtTime(keyTime, keyValue);
+            }
+          } else {
+            shapeLayerProperty.setValue(selectedLayerProperty.value);
+          }
+        }
+
+        // Select both layers
+        selectedLayer.selected = true;
+        shapeLayer.selected = true;
+
+        // Precompose the selected layers
+        var precomp = comp.layers.precompose(
+          [selectedLayer.index, shapeLayer.index],
+          selectedLayer.name + "_group",
+          true
+        );
+
+        showSoftNotification("Wrapped the selected layer successfully!", 2000);
       }
-
-      // Select both layers
-      selectedLayer.selected = true;
-      shapeLayer.selected = true;
-
-      // Precompose the selected layers
-      var precomp = comp.layers.precompose(
-        [selectedLayer.index, shapeLayer.index],
-        selectedLayer.name + "_group",
-        true
-      );
-
-      showSoftNotification("Wrapped the selected layer successfully!", 2000);
     } else {
       alert("Please select a layer first.");
     }
@@ -985,30 +990,30 @@
     var comp = app.project.activeItem; // Get the active composition
     if (comp && comp instanceof CompItem) {
       var selectedLayers = comp.selectedLayers; // Get the first selected layer
-  
+
       //loop through all selected layers
       for (var i = 0; i < selectedLayers.length; i++) {
         var selectedLayer = selectedLayers[i];
         if (selectedLayer) {
           app.beginUndoGroup("Apply Pop-up Animation with Bounce");
-  
+
           // Add scale keyframes for the pop-up effect
           var scaleProperty = selectedLayer.property("Scale");
-  
+
           // get the current scale value
           var endScale = scaleProperty.value;
-  
+
           // Set the initial and final scale values (starting small, then popping up)
           var startScale = [0, 0];
-  
+
           // Time settings
           var startTime = comp.time; // Starting at the current time
           var popUpDuration = 0.3; // 0.5 seconds for the pop-up
-  
+
           // Apply keyframes for the scale property
           scaleProperty.setValueAtTime(startTime, startScale);
           scaleProperty.setValueAtTime(startTime + popUpDuration, endScale);
-  
+
           // Apply the provided bounce expression
           var bounceExpression =
             "amp = 0.05;" + // Amplitude
@@ -1032,22 +1037,22 @@
             "}else{" +
             "value;" +
             "}";
-  
+
           scaleProperty.expression = bounceExpression;
-  
+
           //add ease to the first keyframe
           var easeIn = new KeyframeEase(0, 100); // Influence: 100%
           var easeOut = new KeyframeEase(0, 100); // Influence: 100%
-  
+
           //find the nearest keyframe index
           var keyIndex = scaleProperty.nearestKeyIndex(startTime);
-  
+
           scaleProperty.setTemporalEaseAtKey(
             keyIndex,
             [easeIn, easeIn, easeIn],
             [easeOut, easeOut, easeOut]
           );
-  
+
           app.endUndoGroup();
           showSoftNotification("Pop-up animation applied successfully!", 2000);
         } else {
@@ -1058,7 +1063,6 @@
       alert("No active composition found. Please open a composition.");
     }
   }
-  
 
   function scaleUpDown() {
     app.beginUndoGroup("Add Scale Keyframes with Ease");
@@ -1753,7 +1757,7 @@
       thisObj instanceof Panel
         ? thisObj
         : new Window("palette", undefined, undefined, { resizeable: true });
-    dialog.text = "Rainvic's AE Tools V"+version;
+    dialog.text = "Rainvic's AE Tools V" + version;
     dialog.alignChildren = ["center", "top"];
     // fill available space
     dialog.orientation = "column";
