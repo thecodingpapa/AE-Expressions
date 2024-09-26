@@ -30,7 +30,7 @@
         var bounceExpression =
           "amp = 0.05;" + // Amplitude
           "freq = 2.0;" + // Frequency
-          "decay = 5.0;" + // Decay
+          "decay = 10.0;" + // Decay
           "n = 0;" +
           "if (numKeys > 0){" +
           "n = nearestKey(time).index;" +
