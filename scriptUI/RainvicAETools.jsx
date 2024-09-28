@@ -1,5 +1,5 @@
 {
-  var version = "1.2.1";
+  var version = "1.2.2";
   function showSoftNotification(message, duration) {
     var notificationWindow = new Window("palette", "Notification", undefined, {
       closeButton: false,
@@ -13,7 +13,8 @@
     }, duration);
   }
 
-  function createGraph(
+  function createGraph
+(
     xStart,
     xEnd,
     xStep,
@@ -27,7 +28,10 @@
     graphWidth,
     graphColor,
     duration
-  ) {
+  )
+   {
+
+   
     var version = "1.4.2";
 
     //screen size 1920 x 1080
@@ -40,7 +44,11 @@
     // var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
     var xValues = [];
     if (xValues.length == 0) {
-      for (var i = xStart; i <= xEnd; i += xStep) {
+      for (
+        var i = xStart;
+        i <= xEnd;
+        i += xStep
+      ) {
         xValues.push(i);
       }
     }
@@ -48,7 +56,11 @@
     // var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"];
     var yValues = [];
     if (yValues.length == 0) {
-      for (var i = yStart; i <= yEnd; i += yStep) {
+      for (
+        var i = yStart;
+        i <= yEnd;
+        i += yStep
+      ) {
         yValues.push(i);
       }
     }
@@ -97,6 +109,7 @@
     var project = app.project;
     var folder = project.items.addFolder(graphName);
 
+
     // Create a new composition
     var graphAnimComp = app.project.items.addComp(
       graphName,
@@ -124,7 +137,7 @@
       duration,
       30
     );
-
+    
     var yvaluesComp = app.project.items.addComp(
       yvaluesName,
       width,
@@ -133,22 +146,24 @@
       duration,
       30
     );
-
+    
     var graphsComp = app.project.items.addComp(
       graphsName,
       width,
       height,
       1,
-      duration,
+        duration,
       30
     );
-
-    graphAnimComp.layers.add(linesComp);
-    graphAnimComp.layers.add(xvaluesComp);
-    graphAnimComp.layers.add(yvaluesComp);
-    graphAnimComp.layers.add(graphsComp);
+    
+    var linesCompLayer = graphAnimComp.layers.add(linesComp);
+    var xValuesCompLayer = graphAnimComp.layers.add(xvaluesComp);
+    var yValuesCompLayer = graphAnimComp.layers.add(yvaluesComp);
+    var graphsCompLayer = graphAnimComp.layers.add(graphsComp);
     var scaleControlLayer = graphAnimComp.layers.addNull();
     scaleControlLayer.name = "Scale Control";
+
+
 
     graphAnimComp.parentFolder = folder;
     linesComp.parentFolder = folder;
@@ -505,7 +520,7 @@
       numberOfMiddleLines = yValues.length - 2;
     }
 
-    // Create three horizontal lines spread through
+    // Create horizontal lines spread through
     for (var i = 1; i <= numberOfMiddleLines; i++) {
       var yPos =
         compHeight -
@@ -517,6 +532,19 @@
         "Horizontal Line " + i
       );
     }
+
+    //add a mask on the linesCompLayer that covers the graph area
+    var maskShape = new Shape();
+    maskShape.vertices = [
+      [margin, margin],
+      [margin, compHeight - margin],
+      [compWidth - margin, compHeight - margin],
+      [compWidth - margin, margin]
+    ];
+    maskShape.closed = true;
+    var mask = linesCompLayer.Masks.addProperty("Mask");
+    mask.property("maskShape").setValue(maskShape);
+
 
     // Create text layers below the bottom horizontal line
     var textYPos = compHeight - margin + textYPosFromBottomLine; // adjust textHeight as needed
@@ -536,7 +564,37 @@
       createYText([textXPos, yPos], yValues[i - 1], yValues[i - 1]);
     }
 
+    //add a mask on the yValuesCompLayer that covers the text area
+    var ymaskShape = new Shape();
+    ymaskShape.vertices = [
+      [margin-200, margin-100],
+      [margin-200, compHeight - margin + 100],
+      [margin-10, compHeight - margin + 100],
+      [margin-10, margin-100]
+    ];
+    ymaskShape.closed = true;
+    var ymask = yValuesCompLayer.Masks.addProperty("Mask");
+    ymask.property("maskShape").setValue(ymaskShape);
+
+    //add a mask on the xValuesCompLayer that covers the text area
+    var xmaskShape = new Shape();
+    xmaskShape.vertices = [
+      [margin-100, compHeight - margin + 10],
+      [compWidth - margin + 100, compHeight - margin + 10],
+      [compWidth - margin + 100, compHeight - margin + 100],
+      [margin-100, compHeight - margin + 100]
+    ];
+    xmaskShape.closed = true;
+    var xmask = xValuesCompLayer.Masks.addProperty("Mask");
+    xmask.property("maskShape").setValue(xmaskShape);
+
+
+
     createGraphLayers();
+
+    //add a mask on the graphsCompLayer
+    var graphMask = graphsCompLayer.Masks.addProperty("Mask");
+    graphMask.property("maskShape").setValue(maskShape);
 
     // Apply the zoom effect to the null layer
     zoomLayer(scaleControlLayer, [100, 100], [200, 200], 1, 2);
@@ -549,16 +607,16 @@
     keepStrokeWidthConstant(linesComp.layers, strokeWidth);
     keepStrokeWidthConstant(graphsComp.layers, graphWidth);
 
+    
     // Add the graphAnimComp to the currently opened composition
     var activeComp = app.project.activeItem;
     if (activeComp && activeComp instanceof CompItem) {
-      activeComp.layers.add(graphAnimComp);
+        activeComp.layers.add(graphAnimComp);
     } else {
-      alert(
-        "No active composition found. Click the timeline to make a composition active. Then create graph again."
-      );
+        alert("No active composition found. Click the timeline to make a composition active. Then create graph again.");
     }
   }
+
 
   function counterUp(start, end) {
     // Create a new text layer with a slider controlling the number counting-up effect with easing
@@ -2349,6 +2407,66 @@
     yStepEdittext.text = "10";
     yStepEdittext.preferredSize.width = 50;
 
+    //color group
+    var colorPanel = tab3.add("group", undefined, { name: "colorPanel" });
+    colorPanel.orientation = "row";
+    colorPanel.alignChildren = ["left", "center"];
+    colorPanel.spacing = 10;
+    colorPanel.margins = 0;
+
+    //color label
+    var colorLabel = colorPanel.add("statictext", undefined, undefined, {
+      name: "colorLabel",
+    });
+    colorLabel.text = "Choose Color -> ";
+    colorLabel.fontSize = 9;
+    colorLabel.color = [0.5, 0.5, 0.5];
+    
+
+    // Initial hex color
+    var hex = "0x000000";
+    var colorRGB = [0,0,0];
+   
+    //color picker
+    var colourOneButton = colorPanel.add("button", undefined, '');
+    colourOneButton.size = [24, 24];
+    colourOneButton.fillBrush = colourOneButton.graphics.newBrush(colourOneButton.graphics.BrushType.SOLID_COLOR, colorRGB);
+    colourOneButton.onDraw = customDraw;
+        
+
+    // Define the onClick function for the color button
+    colourOneButton.onClick = function() {
+      var colorPickerRes = $.colorPicker(hex);
+      if (colorPickerRes != -1) {
+          var r = (colorPickerRes >> 16) & 0xFF;
+          var g = (colorPickerRes >> 8) & 0xFF;
+          var b = colorPickerRes & 0xFF;
+          $.writeln("Selected a color");
+          hex = colorPickerRes;
+          colorRGB = [r / 255, g / 255, b / 255];
+          updateButtonColour(colourOneButton, colorRGB);
+      } else {
+          $.writeln("Did not select a color");
+      }
+    };
+
+    // Custom draw function for the button
+    function customDraw() {
+      with (this) {
+          graphics.drawOSControl();
+          graphics.rectPath(0, 0, size[0], size[1]);
+          graphics.fillPath(fillBrush);
+      }
+    }
+
+    // Function to update the button color
+    function updateButtonColour(button, rgbArray) {
+      button.fillBrush = button.graphics.newBrush(button.graphics.BrushType.SOLID_COLOR, rgbArray);
+      button.onDraw = customDraw;
+      button.enabled = false;
+      button.enabled = true;
+    }
+
     var button6 = tab3.add("button", undefined, undefined, { name: "button6" });
     button6.text = "Create Graph";
     button6.onClick = function () {
@@ -2362,12 +2480,24 @@
         200,
         4,
         20,
-        [0, 0, 0],
+        colorRGB,
         10,
-        [0, 0, 0],
+        colorRGB,
         300
       );
     };
+
+    // instructions text
+    var instructions = tab3.add("statictext", undefined, undefined, {
+      name: "instructions",
+      multiline: true,
+    });
+    instructions.text =
+      "1> Choose a Color and click 'Create Graph'. (Click The Color in the color panel and just close it)   2> If it doesn't work, Save project and restart AE.   Try again.";
+    instructions.fontSize = 9;
+    instructions.preferredSize.width = 400;
+    instructions.color = [0.5, 0.5, 0.5];
+
 
     dialog.layout.layout(true);
 

@@ -1,4 +1,5 @@
-function createGraph(
+function createGraph
+(
     xStart,
     xEnd,
     xStep,
@@ -12,7 +13,10 @@ function createGraph(
     graphWidth,
     graphColor,
     duration
-  ) {
+  )
+   {
+
+   
     var version = "1.4.2";
 
     //screen size 1920 x 1080
@@ -137,10 +141,10 @@ function createGraph(
       30
     );
     
-    graphAnimComp.layers.add(linesComp);
-    graphAnimComp.layers.add(xvaluesComp);
-    graphAnimComp.layers.add(yvaluesComp);
-    graphAnimComp.layers.add(graphsComp);
+    var linesCompLayer = graphAnimComp.layers.add(linesComp);
+    var xValuesCompLayer = graphAnimComp.layers.add(xvaluesComp);
+    var yValuesCompLayer = graphAnimComp.layers.add(yvaluesComp);
+    var graphsCompLayer = graphAnimComp.layers.add(graphsComp);
     var scaleControlLayer = graphAnimComp.layers.addNull();
     scaleControlLayer.name = "Scale Control";
 
@@ -501,7 +505,7 @@ function createGraph(
       numberOfMiddleLines = yValues.length - 2;
     }
 
-    // Create three horizontal lines spread through
+    // Create horizontal lines spread through
     for (var i = 1; i <= numberOfMiddleLines; i++) {
       var yPos =
         compHeight -
@@ -513,6 +517,19 @@ function createGraph(
         "Horizontal Line " + i
       );
     }
+
+    //add a mask on the linesCompLayer that covers the graph area
+    var maskShape = new Shape();
+    maskShape.vertices = [
+      [margin, margin],
+      [margin, compHeight - margin],
+      [compWidth - margin, compHeight - margin],
+      [compWidth - margin, margin]
+    ];
+    maskShape.closed = true;
+    var mask = linesCompLayer.Masks.addProperty("Mask");
+    mask.property("maskShape").setValue(maskShape);
+
 
     // Create text layers below the bottom horizontal line
     var textYPos = compHeight - margin + textYPosFromBottomLine; // adjust textHeight as needed
@@ -532,7 +549,37 @@ function createGraph(
       createYText([textXPos, yPos], yValues[i - 1], yValues[i - 1]);
     }
 
+    //add a mask on the yValuesCompLayer that covers the text area
+    var ymaskShape = new Shape();
+    ymaskShape.vertices = [
+      [margin-200, margin-100],
+      [margin-200, compHeight - margin + 100],
+      [margin-10, compHeight - margin + 100],
+      [margin-10, margin-100]
+    ];
+    ymaskShape.closed = true;
+    var ymask = yValuesCompLayer.Masks.addProperty("Mask");
+    ymask.property("maskShape").setValue(ymaskShape);
+
+    //add a mask on the xValuesCompLayer that covers the text area
+    var xmaskShape = new Shape();
+    xmaskShape.vertices = [
+      [margin-100, compHeight - margin + 10],
+      [compWidth - margin + 100, compHeight - margin + 10],
+      [compWidth - margin + 100, compHeight - margin + 100],
+      [margin-100, compHeight - margin + 100]
+    ];
+    xmaskShape.closed = true;
+    var xmask = xValuesCompLayer.Masks.addProperty("Mask");
+    xmask.property("maskShape").setValue(xmaskShape);
+
+
+
     createGraphLayers();
+
+    //add a mask on the graphsCompLayer
+    var graphMask = graphsCompLayer.Masks.addProperty("Mask");
+    graphMask.property("maskShape").setValue(maskShape);
 
     // Apply the zoom effect to the null layer
     zoomLayer(scaleControlLayer, [100, 100], [200, 200], 1, 2);
@@ -557,13 +604,19 @@ function createGraph(
 
 
   createGraph(
-    0,
-    10,
     1,
-    0,
-    100,
+    4,
+    1,
+    2.0,
+    3.1,
+    0.1,
+    250,
+    4,
+    20,
+    [1, 1, 1],
     10,
-    200, 4, 20, [0,0,0], 10, [0,0,0], 300
+    [1, 1, 1],
+    300
   );
 // var version = "1.4.2";
 

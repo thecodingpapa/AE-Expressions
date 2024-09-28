@@ -33,6 +33,14 @@
                 var layer = selectedLayers[i];
                 var currentPosition = layer.property("Position").value;
                 var newPosition = [currentPosition[0], currentPosition[1], startZ + (i * 500)]; // Set Z position with equal distance
+
+                //check if keyframe enabled
+                if (layer.position.isTimeVarying) {
+                    layer.position.setValueAtTime(comp.time, newPosition);
+                } else {
+                    layer.position.setValue(newPosition);
+                }
+                
                 layer.property("Position").setValue(newPosition); // Apply new Z position
             }
 
