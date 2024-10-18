@@ -1,5 +1,5 @@
 {
-  var version = "1.2.2";
+  var version = "1.2.3";
   function showSoftNotification(message, duration) {
     var notificationWindow = new Window("palette", "Notification", undefined, {
       closeButton: false,
