@@ -807,53 +807,6 @@
     showSoftNotification("Dotted line animation created successfully!", 2000);
   }
 
-  function changeKeyframeVelocity() {
-    {
-      // Get the active composition
-      var comp = app.project.activeItem;
-
-      // Ensure the composition is valid and something is selected
-      if (
-        comp != null &&
-        comp instanceof CompItem &&
-        comp.selectedLayers.length > 0
-      ) {
-        // Loop through selected layers
-        for (var i = 0; i < comp.selectedLayers.length; i++) {
-          var layer = comp.selectedLayers[i];
-
-          // Check if the layer has selected properties with keyframes
-          if (layer.selectedProperties.length > 0) {
-            for (var j = 0; j < layer.selectedProperties.length; j++) {
-              var prop = layer.selectedProperties[j];
-
-              // Check if the property is keyframed
-              if (prop.numKeys > 0) {
-                // Loop through selected keyframes
-                for (var k = 1; k <= prop.numKeys; k++) {
-                  if (prop.keySelected(k)) {
-                    // Define custom ease settings
-                    var easeIn = new KeyframeEase(0, 70); // Influence: 50%
-                    var easeOut = new KeyframeEase(0, 70); // Influence: 50%
-
-                    // Set ease for temporal keyframes (spatial keyframes need separate handling)
-                    prop.setTemporalEaseAtKey(k, [easeIn], [easeOut]);
-
-                    // Optional: Adjust spatial tangents for motion paths (if it's a spatial property)
-                    // prop.setSpatialTangentsAtKey(k, [50, 50], [-50, -50]);
-                  }
-                }
-              }
-            }
-          }
-        }
-        showSoftNotification("Keyframe velocity changed successfully!", 2000);
-      } else {
-        alert("Please select a layer with keyframes.");
-      }
-    }
-  }
-
   function centerAnchorPoint(selectedLayer) {
     if (selectedLayer != null) {
       // Get the layer's content bounding box
@@ -2077,17 +2030,6 @@
     tab1.alignChildren = ["left", "top"];
     tab1.spacing = 10;
     tab1.margins = 10;
-
-    var changeKeyframeVelocityBtn = tab1.add("button", undefined, undefined, {
-      name: "changeKeyframeVelocity",
-    });
-    changeKeyframeVelocityBtn.text = "Change Keyframe Velocity";
-    changeKeyframeVelocityBtn.onClick = changeKeyframeVelocity;
-
-    var divider1 = tab1.add("panel", undefined, undefined, {
-      name: "divider1",
-    });
-    divider1.alignment = "fill";
 
     var button1 = tab1.add("button", undefined, undefined, { name: "button1" });
     button1.text = "Loop It!";
