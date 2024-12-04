@@ -1,5 +1,5 @@
 {
-  var version = "1.2.3";
+  var version = "1.2.5";
   function showSoftNotification(message, duration) {
     var notificationWindow = new Window("palette", "Notification", undefined, {
       closeButton: false,
@@ -2413,12 +2413,12 @@
     button6.text = "Create Graph";
     button6.onClick = function () {
       createGraph(
-        parseInt(xStartEdittext.text),
-        parseInt(xEndEdittext.text),
-        parseInt(xStepEdittext.text),
-        parseInt(yStartEdittext.text),
-        parseInt(yEndEdittext.text),
-        parseInt(yStepEdittext.text),
+        parseFloat(xStartEdittext.text),
+        parseFloat(xEndEdittext.text),
+        parseFloat(xStepEdittext.text),
+        parseFloat(yStartEdittext.text),
+        parseFloat(yEndEdittext.text),
+        parseFloat(yStepEdittext.text),
         200,
         4,
         20,
