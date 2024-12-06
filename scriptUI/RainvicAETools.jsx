@@ -1,5 +1,5 @@
 {
-  var version = "1.2.5";
+  var version = "1.2.7";
   function showSoftNotification(message, duration) {
     var notificationWindow = new Window("palette", "Notification", undefined, {
       closeButton: false,
@@ -49,7 +49,7 @@
         i <= xEnd;
         i += xStep
       ) {
-        xValues.push(i);
+        xValues.push(parseFloat(i.toFixed(1)));
       }
     }
 
@@ -61,7 +61,7 @@
         i <= yEnd;
         i += yStep
       ) {
-        yValues.push(i);
+        yValues.push(parseFloat(i.toFixed(1)));
       }
     }
 
@@ -517,15 +517,15 @@
     );
 
     if (numberOfMiddleLines == 0) {
-      numberOfMiddleLines = yValues.length - 2;
+      numberOfMiddleLines = yValues.length - 1;
     }
 
     // Create horizontal lines spread through
-    for (var i = 1; i <= numberOfMiddleLines; i++) {
+    for (var i = 1; i < numberOfMiddleLines; i++) {
       var yPos =
         compHeight -
         margin -
-        (i * (compHeight - 2 * margin)) / (numberOfMiddleLines + 1);
+        (i * (compHeight - 2 * margin)) / numberOfMiddleLines ;
       createDottedLine(
         [margin, yPos],
         [compWidth - margin, yPos],

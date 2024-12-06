@@ -637,7 +637,7 @@ function createGraph
         i <= xEnd;
         i += xStep
       ) {
-        xValues.push(i);
+        xValues.push(parseFloat(i.toFixed(1)));
       }
     }
 
@@ -649,7 +649,7 @@ function createGraph
         i <= yEnd;
         i += yStep
       ) {
-        yValues.push(i);
+        yValues.push(parseFloat(i.toFixed(1)));
       }
     }
 
@@ -1105,15 +1105,15 @@ function createGraph
     );
 
     if (numberOfMiddleLines == 0) {
-      numberOfMiddleLines = yValues.length - 2;
+      numberOfMiddleLines = yValues.length - 1;
     }
 
     // Create horizontal lines spread through
-    for (var i = 1; i <= numberOfMiddleLines; i++) {
+    for (var i = 1; i < numberOfMiddleLines; i++) {
       var yPos =
         compHeight -
         margin -
-        (i * (compHeight - 2 * margin)) / (numberOfMiddleLines + 1);
+        (i * (compHeight - 2 * margin)) / numberOfMiddleLines ;
       createDottedLine(
         [margin, yPos],
         [compWidth - margin, yPos],
@@ -1209,8 +1209,8 @@ function createGraph
     1,
     4,
     1,
-    2,
-    3,
+    -0.3,
+    0.1,
     0.1,
     250,
     4,
