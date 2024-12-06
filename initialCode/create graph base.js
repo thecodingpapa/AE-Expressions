@@ -632,24 +632,20 @@ function createGraph
     // var xValues = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000"];
     var xValues = [];
     if (xValues.length == 0) {
-      for (
-        var i = xStart;
-        i <= xEnd;
-        i += xStep
-      ) {
-        xValues.push(parseFloat(i.toFixed(1)));
+      var steps = Math.round((xEnd - xStart) / xStep); // Number of intervals
+      for (var n = 0; n <= steps; n++) {
+        var val = xStart + n * xStep;
+        xValues.push(parseFloat(val.toFixed(1)));
       }
     }
 
     // var yValues = ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"];
     var yValues = [];
     if (yValues.length == 0) {
-      for (
-        var i = yStart;
-        i <= yEnd;
-        i += yStep
-      ) {
-        yValues.push(parseFloat(i.toFixed(1)));
+      var steps = Math.round((yEnd - yStart) / yStep); // Number of intervals
+      for (var n = 0; n <= steps; n++) {
+        var val = yStart + n * yStep;
+        yValues.push(parseFloat(val.toFixed(1)));
       }
     }
 
@@ -1105,7 +1101,7 @@ function createGraph
     );
 
     if (numberOfMiddleLines == 0) {
-      numberOfMiddleLines = yValues.length - 1;
+      numberOfMiddleLines = yValues.length-1;
     }
 
     // Create horizontal lines spread through
@@ -1113,7 +1109,7 @@ function createGraph
       var yPos =
         compHeight -
         margin -
-        (i * (compHeight - 2 * margin)) / numberOfMiddleLines ;
+        (i * (compHeight - 2 * margin)) / (numberOfMiddleLines) ;
       createDottedLine(
         [margin, yPos],
         [compWidth - margin, yPos],
