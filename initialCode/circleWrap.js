@@ -90,6 +90,14 @@
 
     // Move the shape layer directly behind the selected layer
     shapeLayer.moveAfter(layer);
+
+    // --- Apply scale factor from selected layer to shape layer ---
+
+    // Get the scale of the selected layer
+    var layerScale = layer.property('Scale').value;
+
+    // Apply the same scale to the shape layer
+    shapeTransform.property('Scale').setValue(layerScale);
   } else {
     alert("Please select a layer in an active composition.");
   }
