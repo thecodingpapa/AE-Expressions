@@ -239,16 +239,11 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             return;
         }
         
-        // Get composition settings from main footage
+        // Set all compositions to 1080p
         var compWidth = 1920;
         var compHeight = 1080;
         var compDuration = 10;
         var frameRate = 30;
-        
-        if (mainFootage.width && mainFootage.height) {
-            compWidth = mainFootage.width;
-            compHeight = mainFootage.height;
-        }
         
         if (mainFootage.duration) {
             compDuration = mainFootage.duration;
@@ -296,16 +291,18 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         comp01.parentFolder = projectFolder;
         var footageLayer01 = comp01.layers.add(mainFootage);
         
-        // Auto-scale the footage to fit 1080p dimensions while maintaining aspect ratio
+        // Auto-scale the footage to fit within 30% of composition dimensions while maintaining aspect ratio
         var sourceWidth = mainFootage.width;
         var sourceHeight = mainFootage.height;
-        var targetWidth = 1920;
-        var targetHeight = 1080;
         
-        if (sourceWidth && sourceHeight && (sourceWidth !== targetWidth || sourceHeight !== targetHeight)) {
-            // Calculate scale factor to fit within 1080p while maintaining aspect ratio
-            var scaleX = targetWidth / sourceWidth;
-            var scaleY = targetHeight / sourceHeight;
+        if (sourceWidth && sourceHeight) {
+            // Calculate 30% of composition dimensions
+            var maxWidth = compWidth * 0.3;
+            var maxHeight = compHeight * 0.3;
+            
+            // Calculate scale factor to fit within 30% of comp size while maintaining aspect ratio
+            var scaleX = maxWidth / sourceWidth;
+            var scaleY = maxHeight / sourceHeight;
             var finalScale = Math.min(scaleX, scaleY) * 100; // Convert to percentage
             
             // Apply scale to the footage layer
