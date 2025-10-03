@@ -1,4 +1,5 @@
 /*
+Verion 1.0
 
     INITIAL PROCEDURES
 Of course. Here is a detailed, step-by-step procedure to create the procedural paper rip effect in After Effects, based on the video.
@@ -239,6 +240,13 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             return;
         }
         
+        // Check for active composition before starting the procedure
+        var activeComp = app.project.activeItem;
+        if (!activeComp || !(activeComp instanceof CompItem)) {
+            alert("⚠️ NO ACTIVE COMPOSITION DETECTED\n\nPlease follow these steps:\n\n1. Select your image/footage in the project panel\n2. Open a composition and click on its timeline\n3. Run this script again\n\nThe Paper Rip Effect requires an active composition.");
+            return;
+        }
+        
         // Set all compositions to 1080p
         var compWidth = 1920;
         var compHeight = 1080;
@@ -410,13 +418,15 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         applySoftDropShadow(dropShadowSoftLayer);
         
         // Add the final composition to the currently active composition if one exists
-        var activeComp = app.project.activeItem;
-        if (activeComp && activeComp instanceof CompItem) {
-            var finalLayer = activeComp.layers.add(finalComp);
+        var currentActiveComp = app.project.activeItem;
+        if (currentActiveComp && currentActiveComp instanceof CompItem) {
+            var finalLayer = currentActiveComp.layers.add(finalComp);
             finalLayer.moveToBeginning(); // Place on top
+            
+            alert("✅ Paper Rip Effect created and added to: " + currentActiveComp.name);
+        } else {
+            alert("✅ Paper Rip Effect created!");
         }
-        
-        alert("Paper Rip Effect created successfully!");
         
     } catch (error) {
         alert("Error creating paper rip effect: " + error.toString());
