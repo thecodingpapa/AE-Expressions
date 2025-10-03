@@ -416,8 +416,7 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             finalLayer.moveToBeginning(); // Place on top
         }
         
-        alert("Paper Rip Effect created successfully!\n\nCompositions created:\n- 01 Insert Footage Here\n- 02 Paper Top Layer\n- 03 Paper Ripped Edges\n- 04 Ripped Paper Effect\n- " + finalCompName + "\n\nThe effect is fully procedural and animated. You can replace the footage in '01 Insert Footage Here' and the entire effect will update automatically!" + 
-              (activeComp && activeComp instanceof CompItem ? "\n\nThe final composition has been added to your active composition: " + activeComp.name : ""));
+        alert("Paper Rip Effect created successfully!");
         
     } catch (error) {
         alert("Error creating paper rip effect: " + error.toString());
