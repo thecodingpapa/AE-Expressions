@@ -250,7 +250,7 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         // Set all compositions to 1080p
         var compWidth = 1920;
         var compHeight = 1080;
-        var compDuration = 10;
+        var compDuration = 120; // 2 minutes
         var frameRate = 30;
         
         if (mainFootage.duration) {
