@@ -23,18 +23,12 @@ function createPaperUnfoldEffect() {
     app.beginUndoGroup("Create Paper Unfold Effect");
     
     try {
-        // Step 1: Find or import required elements
-        var foldingAnimComp = findItemByName("folding anim");
+        // Step 1: Create or find the 'folding anim' composition
+        var foldingAnimComp = createFoldingAnimComposition();
         var selectedImage = getSelectedImageLayer();
         
         if (!foldingAnimComp) {
-            alert("Please make sure you have a composition named 'folding anim' in your project.");
-            app.endUndoGroup();
-            return;
-        }
-        
-        if (!(foldingAnimComp instanceof CompItem)) {
-            alert("The item named 'folding anim' is not a composition. Please make sure it's a composition.");
+            alert("Failed to create 'folding anim' composition. Please make sure 'Paper Crumple Effect.mp4' and 'Paper Unfold.png' are imported in your project.");
             app.endUndoGroup();
             return;
         }
@@ -125,6 +119,127 @@ function findItemByName(name) {
         }
     }
     return null;
+}
+
+function createFoldingAnimComposition() {
+    try {
+        // Check if 'folding anim' composition already exists
+        var existingComp = findItemByName("folding anim");
+        if (existingComp && existingComp instanceof CompItem) {
+            return existingComp;
+        }
+        
+        // Find required footage item
+        var paperCrumpleVideo = findItemByName("Paper Crumple Effect.mp4");
+        
+        if (!paperCrumpleVideo) {
+            alert("Could not find 'Paper Crumple Effect.mp4' in the project. Please import it first.");
+            return null;
+        }
+        
+        // Get main composition for duration and settings
+        var mainComp = app.project.activeItem;
+        if (!(mainComp instanceof CompItem)) {
+            alert("No active composition found for duration reference.");
+            return null;
+        }
+        
+        // Use main composition duration and settings
+        var compDuration = mainComp.duration;
+        var compWidth = mainComp.width;
+        var compHeight = mainComp.height;
+        var frameRate = mainComp.frameRate;
+        var videoDuration = paperCrumpleVideo.duration || 10; // fallback to 10 seconds
+        
+        // Create the 'folding anim' composition with same duration as main comp
+        var foldingComp = app.project.items.addComp("folding anim", compWidth, compHeight, 1, compDuration, frameRate);
+        
+        // Add the video layer first (it will play from start for its full duration)
+        var videoLayer = foldingComp.layers.add(paperCrumpleVideo);
+        videoLayer.name = "Paper Crumple Effect";
+        
+        // Create freeze frame layers to fill the remaining composition duration
+        if (compDuration > videoDuration) {
+            var currentTime = videoDuration;
+            var copyIndex = 1;
+            
+            while (currentTime < compDuration) {
+                // Add a freeze frame copy
+                var freezeFrameCopy = foldingComp.layers.add(paperCrumpleVideo);
+                freezeFrameCopy.name = "Freeze Frame " + copyIndex;
+                
+                // Set start time for this freeze frame
+                freezeFrameCopy.startTime = currentTime;
+                
+                // Calculate end time (either video duration later or composition end, whichever is shorter)
+                var copyEndTime = Math.min(currentTime + videoDuration, compDuration);
+                freezeFrameCopy.outPoint = copyEndTime;
+                
+                // Enable time remapping to show only the last frame
+                freezeFrameCopy.timeRemapEnabled = true;
+                var lastFrameTime = videoDuration - (1 / frameRate);
+                var timeRemapProp = freezeFrameCopy.property("Time Remap");
+                
+                // Set both keyframes to the last frame time
+                timeRemapProp.setValueAtTime(currentTime, lastFrameTime);
+                timeRemapProp.setValueAtTime(copyEndTime, lastFrameTime);
+                
+                // Set to hold interpolation
+                if (timeRemapProp.numKeys >= 2) {
+                    timeRemapProp.setInterpolationTypeAtKey(1, KeyframeInterpolationType.HOLD);
+                }
+                
+                // Scale this freeze frame to fit composition
+                scaleLayerToFitComp(freezeFrameCopy, foldingComp);
+                
+                // Move to next position
+                currentTime += videoDuration;
+                copyIndex++;
+                
+                // Safety break to prevent infinite loops
+                if (copyIndex > 100) {
+                    alert("Warning: Stopped creating freeze frames after 100 copies to prevent infinite loop.");
+                    break;
+                }
+            }
+        }
+        
+        // Scale the main video layer to fit composition
+        scaleLayerToFitComp(videoLayer, foldingComp);
+        
+        return foldingComp;
+        
+    } catch (e) {
+        alert("Error creating 'folding anim' composition: " + e.toString());
+        return null;
+    }
+}
+
+function scaleLayerToFitComp(layer, comp) {
+    try {
+        if (!layer.source) return;
+        
+        var sourceWidth = layer.source.width;
+        var sourceHeight = layer.source.height;
+        
+        if (sourceWidth && sourceHeight) {
+            // Calculate scale to fit composition while maintaining aspect ratio
+            var scaleX = (comp.width / sourceWidth) * 100;
+            var scaleY = (comp.height / sourceHeight) * 100;
+            var finalScale = Math.min(scaleX, scaleY);
+            
+            // Apply scale
+            layer.property("Transform").property("Scale").setValue([finalScale, finalScale]);
+            
+            // Center the layer
+            layer.property("Transform").property("Position").setValue([comp.width/2, comp.height/2]);
+            
+            // Center anchor point
+            layer.property("Transform").property("Anchor Point").setValue([sourceWidth/2, sourceHeight/2]);
+        }
+    } catch (e) {
+        // If scaling fails, continue without scaling
+    }
 }
 
 function getSelectedImageLayer() {
