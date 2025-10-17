@@ -299,16 +299,16 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         comp01.parentFolder = projectFolder;
         var footageLayer01 = comp01.layers.add(mainFootage);
         
-        // Auto-scale the footage to fit within 30% of composition dimensions while maintaining aspect ratio
+        // Auto-scale the footage to fit within 60% of composition dimensions while maintaining aspect ratio
         var sourceWidth = mainFootage.width;
         var sourceHeight = mainFootage.height;
         
         if (sourceWidth && sourceHeight) {
-            // Calculate 30% of composition dimensions
-            var maxWidth = compWidth * 0.3;
-            var maxHeight = compHeight * 0.3;
+            // Calculate 60% of composition dimensions (doubled from 30%)
+            var maxWidth = compWidth * 0.6;
+            var maxHeight = compHeight * 0.6;
             
-            // Calculate scale factor to fit within 30% of comp size while maintaining aspect ratio
+            // Calculate scale factor to fit within 60% of comp size while maintaining aspect ratio
             var scaleX = maxWidth / sourceWidth;
             var scaleY = maxHeight / sourceHeight;
             var finalScale = Math.min(scaleX, scaleY) * 100; // Convert to percentage
@@ -330,6 +330,25 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         var middleFootageLayer = comp02.layers.add(comp01);
         var topFootageLayer = comp02.layers.add(comp01);
         
+        // Scale and position the paper texture to match the image size and position
+        if (sourceWidth && sourceHeight) {
+            // Calculate the same scale and position as the source image
+            var maxWidth = compWidth * 0.6;
+            var maxHeight = compHeight * 0.6;
+            var scaleX = maxWidth / sourceWidth;
+            var scaleY = maxHeight / sourceHeight;
+            var finalScale = Math.min(scaleX, scaleY) * 100;
+            
+            // Calculate how much to scale the texture to cover the scaled image
+            var textureScaleX = (sourceWidth * finalScale / 100) / paperTexture1.width * 100;
+            var textureScaleY = (sourceHeight * finalScale / 100) / paperTexture1.height * 100;
+            var textureScale = Math.max(textureScaleX, textureScaleY); // Use max to ensure full coverage
+            
+            // Apply scale and position to match the image
+            paperLayer1.property("Transform").property("Scale").setValue([textureScale, textureScale]);
+            paperLayer1.property("Transform").property("Position").setValue([compWidth/2, compHeight/2]);
+        }
+        
         // Set middle layer blending mode to Stencil Alpha
         middleFootageLayer.blendingMode = BlendingMode.STENCIL_ALPHA;
         
@@ -347,6 +366,25 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         // Note: In AE scripting, layers are added from top to bottom, so we add in reverse order
         var fibrousEdgeTexture = comp03.layers.add(paperTexture2);
         var comp02LayerInComp03 = comp03.layers.add(comp02);
+        
+        // Scale and position the fibrous edge texture to match the image size and position
+        if (sourceWidth && sourceHeight) {
+            // Calculate the same scale and position as the source image
+            var maxWidth = compWidth * 0.6;
+            var maxHeight = compHeight * 0.6;
+            var scaleX = maxWidth / sourceWidth;
+            var scaleY = maxHeight / sourceHeight;
+            var finalScale = Math.min(scaleX, scaleY) * 100;
+            
+            // Calculate how much to scale the texture to cover the scaled image
+            var textureScaleX = (sourceWidth * finalScale / 100) / paperTexture2.width * 100;
+            var textureScaleY = (sourceHeight * finalScale / 100) / paperTexture2.height * 100;
+            var textureScale = Math.max(textureScaleX, textureScaleY); // Use max to ensure full coverage
+            
+            // Apply scale and position to match the image
+            fibrousEdgeTexture.property("Transform").property("Scale").setValue([textureScale, textureScale]);
+            fibrousEdgeTexture.property("Transform").property("Position").setValue([compWidth/2, compHeight/2]);
+        }
         
         // Set comp02 blending mode to Stencil Alpha
         comp02LayerInComp03.blendingMode = BlendingMode.STENCIL_ALPHA;
@@ -423,7 +461,16 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             var finalLayer = currentActiveComp.layers.add(finalComp);
             finalLayer.moveToBeginning(); // Place on top
             
-            alert("✅ Paper Rip Effect created and added to: " + currentActiveComp.name);
+            // Remove the original source image from the active composition
+            // Find and remove any layers that match the main footage
+            for (var i = currentActiveComp.layers.length; i >= 1; i--) {
+                var layer = currentActiveComp.layers[i];
+                if (layer.source === mainFootage) {
+                    layer.remove();
+                }
+            }
+            
+            alert("✅ Paper Rip Effect created and added to: " + currentActiveComp.name + "\n🗑️ Original source image removed from composition");
         } else {
             alert("✅ Paper Rip Effect created!");
         }
@@ -437,26 +484,26 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
     // Helper function to apply effects to Step 2 middle layer
     function applyTopLayerEffects(layer) {
         try {
-            // Simple Choker
+            // Simple Choker (doubled thickness)
             var simpleChoker = layer.Effects.addProperty("ADBE Simple Choker");
-            simpleChoker.property("Choke Matte").setValue(-25);
+            simpleChoker.property("Choke Matte").setValue(-50);
             
-            // Turbulence Displace (Large)
+            // Turbulence Displace (Large) - doubled amounts
             var turbulence1 = layer.Effects.addProperty("ADBE Turbulent Displace");
             turbulence1.name = "Turbulence - Large";
-            turbulence1.property("Amount").setValue(30);
-            turbulence1.property("Size").setValue(20);
+            turbulence1.property("Amount").setValue(60);
+            turbulence1.property("Size").setValue(40);
             
-            // Turbulence Displace (Small)
+            // Turbulence Displace (Small) - doubled amounts
             var turbulence2 = layer.Effects.addProperty("ADBE Turbulent Displace");
             turbulence2.name = "Turbulence - Small";
-            turbulence2.property("Amount").setValue(60);
-            turbulence2.property("Size").setValue(4);
+            turbulence2.property("Amount").setValue(120);
+            turbulence2.property("Size").setValue(8);
             
-            // Roughen Edges
+            // Roughen Edges - doubled values
             var roughenEdges = layer.Effects.addProperty("ADBE Roughen Edges");
-            roughenEdges.property("Border").setValue(3);
-            roughenEdges.property("Scale").setValue(13);
+            roughenEdges.property("Border").setValue(6);
+            roughenEdges.property("Scale").setValue(26);
             
         } catch (e) {
             alert("Error applying top layer effects: " + e.toString());
@@ -466,26 +513,26 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
     // Helper function to apply effects to Step 3 edge layer
     function applyEdgeEffects(layer) {
         try {
-            // Simple Choker
+            // Simple Choker (doubled thickness)
             var simpleChoker = layer.Effects.addProperty("ADBE Simple Choker");
-            simpleChoker.property("Choke Matte").setValue(-30);
+            simpleChoker.property("Choke Matte").setValue(-60);
             
-            // Turbulence Displace (Large)
+            // Turbulence Displace (Large) - doubled amounts
             var turbulence1 = layer.Effects.addProperty("ADBE Turbulent Displace");
             turbulence1.name = "Turbulence - Large";
-            turbulence1.property("Amount").setValue(30);
-            turbulence1.property("Size").setValue(20);
+            turbulence1.property("Amount").setValue(60);
+            turbulence1.property("Size").setValue(40);
             
-            // Turbulence Displace (Small)
+            // Turbulence Displace (Small) - doubled amounts
             var turbulence2 = layer.Effects.addProperty("ADBE Turbulent Displace");
             turbulence2.name = "Turbulence - Small";
-            turbulence2.property("Amount").setValue(60);
-            turbulence2.property("Size").setValue(4);
+            turbulence2.property("Amount").setValue(120);
+            turbulence2.property("Size").setValue(8);
             
-            // Roughen Edges
+            // Roughen Edges - doubled values
             var roughenEdges = layer.Effects.addProperty("ADBE Roughen Edges");
-            roughenEdges.property("Border").setValue(3);
-            roughenEdges.property("Scale").setValue(13);
+            roughenEdges.property("Border").setValue(6);
+            roughenEdges.property("Scale").setValue(26);
             
         } catch (e) {
             alert("Error applying edge effects: " + e.toString());
@@ -495,28 +542,28 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
     // Helper function to apply effects to "Map for Edges" layer
     function applyMapForEdgesEffects(layer) {
         try {
-            // Simple Choker
+            // Simple Choker (doubled thickness)
             var simpleChoker = layer.Effects.addProperty("ADBE Simple Choker");
-            simpleChoker.property("Choke Matte").setValue(-2);
+            simpleChoker.property("Choke Matte").setValue(-4);
             
-            // Turbulence Displace (Large)
+            // Turbulence Displace (Large) - doubled amounts
             var turbulence1 = layer.Effects.addProperty("ADBE Turbulent Displace");
             turbulence1.name = "Turbulence - Large";
             turbulence1.property("Amount").setValue(30);
             turbulence1.property("Size").setValue(20);
             
-            // Turbulence Displace (Small)
+            // Turbulence Displace (Small) - doubled amounts
             var turbulence2 = layer.Effects.addProperty("ADBE Turbulent Displace");
             turbulence2.name = "Turbulence - Small";
             turbulence2.property("Amount").setValue(60);
             turbulence2.property("Size").setValue(4);
             
-            // Roughen Edges
+            // Roughen Edges - doubled values
             var roughenEdges = layer.Effects.addProperty("ADBE Roughen Edges");
             roughenEdges.property("Border").setValue(3);
             roughenEdges.property("Scale").setValue(13);
             
-            // Gaussian Blur
+            // Gaussian Blur - doubled for thicker edge effect
             var gaussianBlur = layer.Effects.addProperty("ADBE Gaussian Blur 2");
             gaussianBlur.property("Blurriness").setValue(25);
             
@@ -528,10 +575,10 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
     // Helper function to apply effects to "Matte for shadow" layer
     function applyMatteForShadowEffects(layer) {
         try {
-            // Turbulence Displace
+            // Turbulence Displace - doubled amounts
             var turbulence = layer.Effects.addProperty("ADBE Turbulent Displace");
-            turbulence.property("Amount").setValue(20);
-            turbulence.property("Size").setValue(7);
+            turbulence.property("Amount").setValue(40);
+            turbulence.property("Size").setValue(14);
             
         } catch (e) {
             alert("Error applying matte for shadow effects: " + e.toString());
@@ -547,7 +594,7 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             dropShadow.property("Opacity").setValue(0.5); // Adjust to taste
             dropShadow.property("Direction").setValue(0); // Center it
             dropShadow.property("Distance").setValue(0);
-            dropShadow.property("Softness").setValue(3);
+            dropShadow.property("Softness").setValue(6); // Doubled for thicker shadow
             
         } catch (e) {
             alert("Error applying inner shadow effect: " + e.toString());
@@ -563,10 +610,10 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             dropShadow.property("Opacity").setValue(0.4); // 40%
             dropShadow.property("Distance").setValue(0);
             
-            // Turbulence Displace
+            // Turbulence Displace - doubled amounts
             var turbulence = layer.Effects.addProperty("ADBE Turbulent Displace");
-            turbulence.property("Amount").setValue(20);
-            turbulence.property("Size").setValue(20);
+            turbulence.property("Amount").setValue(40);
+            turbulence.property("Size").setValue(40);
             
         } catch (e) {
             alert("Error applying hard drop shadow: " + e.toString());
@@ -581,12 +628,12 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             dropShadow.property("Shadow Only").setValue(true);
             dropShadow.property("Opacity").setValue(0.4); // 40%
             dropShadow.property("Distance").setValue(0);
-            dropShadow.property("Softness").setValue(10);
+            dropShadow.property("Softness").setValue(20); // Doubled for softer shadow
             
-            // Turbulence Displace
+            // Turbulence Displace - doubled amounts
             var turbulence = layer.Effects.addProperty("ADBE Turbulent Displace");
-            turbulence.property("Amount").setValue(20);
-            turbulence.property("Size").setValue(30);
+            turbulence.property("Amount").setValue(40);
+            turbulence.property("Size").setValue(60);
             
         } catch (e) {
             alert("Error applying soft drop shadow: " + e.toString());
