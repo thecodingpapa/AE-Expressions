@@ -2,28 +2,118 @@
 (function createDecagonPopOut() {
 
     // 1. Validation and Setup
-    var currentComp = app.project.activeItem;
-    if (!(currentComp instanceof CompItem)) {
-        alert("Please select a composition.");
-        return;
+    
+    var destinationComp = null;
+    var subjectSource = null;
+    var bgSource = null;
+
+    // Check Input Sources from Project Panel
+    var selectedItems = app.project.selection;
+    var validFootage = [];
+
+    // Collect valid footage/comp items that could be sources
+    for (var i = 0; i < selectedItems.length; i++) {
+        if (selectedItems[i] instanceof FootageItem || selectedItems[i] instanceof CompItem) {
+            validFootage.push(selectedItems[i]);
+        }
+    }
+    
+    // Attempt Detection of Roles
+    if (validFootage.length === 3) {
+        // Try to find the single Comp among 3 items which would be the destination
+        var comps = [];
+        var footages = [];
+        for (var i = 0; i < validFootage.length; i++) {
+             if (validFootage[i] instanceof CompItem) comps.push(validFootage[i]);
+             else footages.push(validFootage[i]);
+        }
+        
+        // If exactly 1 comp and 2 non-destinations, assume that comp is destination
+        if (comps.length === 1 && footages.length === 2) {
+             destinationComp = comps[0];
+             subjectSource = footages[0]; // Assume first is subject
+             bgSource = footages[1];
+        }
+    } else if (validFootage.length === 2) {
+         // If 2 items, they must be the sources
+         subjectSource = validFootage[0];
+         bgSource = validFootage[1];
+         
+         // Try Active Item as potential destination
+         if (app.project.activeItem instanceof CompItem) {
+             destinationComp = app.project.activeItem;
+         }
     }
 
-    var selectedLayers = currentComp.selectedLayers;
-    if (selectedLayers.length !== 2) {
-        alert("Please select exactly 2 layers.\n1. Subject (Top)\n2. Background (Bottom)");
-        return;
+    // --- UI Fallback Logic ---
+    // If we have sources but NO destination (because timeline wasn't active), ASK the user.
+    if (subjectSource && bgSource && !destinationComp) {
+        
+        // Gather all comps
+        var allComps = [];
+        for (var i = 1; i <= app.project.items.length; i++) {
+            if (app.project.items[i] instanceof CompItem) {
+                allComps.push(app.project.items[i]);
+            }
+        }
+
+        if (allComps.length > 0) {
+            var dlg = new Window("dialog", "Select Target Composition");
+            dlg.orientation = "column";
+            dlg.add("statictext", undefined, "Could not detect active composition.");
+            dlg.add("statictext", undefined, "Where should the result be placed?");
+            
+            var list = dlg.add("listbox", [0, 0, 300, 200], []);
+            for (var j = 0; j < allComps.length; j++) {
+                list.add("item", allComps[j].name);
+            }
+            list.selection = 0;
+            
+            var btnGroup = dlg.add("group");
+            var btnSelect = btnGroup.add("button", undefined, "Select Comp", {name: "ok"});
+            var btnStandalone = btnGroup.add("button", undefined, "Create New (Standalone)");
+            var btnCancel = btnGroup.add("button", undefined, "Cancel", {name: "cancel"});
+            
+            btnStandalone.onClick = function() {
+                destinationComp = null; 
+                dlg.close(2); // Return 2
+            }
+            
+            var result = dlg.show();
+            
+            if (result === 1) { // OK (Select)
+                if (list.selection) {
+                    destinationComp = allComps[list.selection.index];
+                }
+            } else if (result === 2) { // Standalone
+                destinationComp = null;
+            } else { // Cancel
+                return; // Exit script
+            }
+        }
+    }
+
+    // Final Validation of Sources
+    if (!subjectSource || !bgSource) {
+         alert("Please select 2 Source Images (Subject & Background) in the Project Panel.");
+         return;
     }
 
     app.beginUndoGroup("Create Decagon Pop-Out");
 
     try {
-        var subjectSource = selectedLayers[0].source;
-        var bgSource = selectedLayers[1].source;
         var baseName = subjectSource.name.replace(/\.[^\.]+$/, "");
 
-        // 2. Create Destination Composition
+        // 2. Create Destination Composition (The Wrapper)
+        // Use destinationComp specs if available, else standard.
+        var compWidth = destinationComp ? destinationComp.width : 1920;
+        var compHeight = destinationComp ? destinationComp.height : 1080;
+        var compDur = destinationComp ? destinationComp.duration : 10;
+        var compFPS = destinationComp ? destinationComp.frameRate : 30;
+
         var newCompName = "Decagon - " + baseName;
-        var newComp = app.project.items.addComp(newCompName, 1200, 1200, 1, currentComp.duration, currentComp.frameRate);
+        // avoid potential name collision or assume unique
+        var newComp = app.project.items.addComp(newCompName, 1200, 1200, 1, compDur, compFPS);
         
         newComp.openInViewer();
 
@@ -39,7 +129,7 @@
         var subjectHeight = 850;
         var centerPos = [newComp.width / 2, newComp.height / 2];
 
-        // --- Create Shapes ---
+        // --- Create Shapes (in New Comp) ---
         
         // 1. Decagon Frame
         var frameShape = newComp.layers.addShape();
@@ -61,7 +151,7 @@
 
         // --- Process Transforms ---
 
-        // Background Transform
+        // Background
         if (bgLayer.width > 0) {
             var bgScaleVal = 100;
             var scaleX = (bgSize / bgLayer.width) * 100;
@@ -71,7 +161,7 @@
         }
         bgLayer.position.setValue(centerPos);
 
-        // Subject Transform
+        // Subject
         var subScaleVal = 100;
         if (subjectLayer.height > 0) {
             subScaleVal = (subjectHeight / subjectLayer.height) * 100;
@@ -98,28 +188,32 @@
         safeSetTrackMatte(bgLayer, bgMatte);
 
         // --- Apply Shadows ---
-        
-        // 1. Frame Shadow (Inner-like on BG)
         addDropShadow(frameShape, {
-            opacity: 125, // Approx 50% if 255 base. Try generic.
+            opacity: 125, // ~50%
             distance: 0,
             softness: 20
         });
 
-        // 2. Subject Shadow (Outer)
         addDropShadow(subjectLayer, {
-            opacity: 125,
+            opacity: 125, // ~50%
             distance: 10,
             softness: 30
         });
 
         // --- Place New Comp Logic ---
-        var resultLayer = currentComp.layers.add(newComp);
-        resultLayer.moveToBeginning();
-        
-        resultLayer.selected = true;
-
-        alert("Decagon Pop-Out Composition Created!");
+        if (destinationComp) {
+            // Add new comp to destination
+            var resultLayer = destinationComp.layers.add(newComp);
+            resultLayer.moveToBeginning();
+            resultLayer.selected = true;
+            
+            // Switch view to destination comp
+            destinationComp.openInViewer();
+            
+            alert("Decagon Pop-Out Created in '" + destinationComp.name + "'!");
+        } else {
+            alert("Decagon Pop-Out Created!\n(Opened as new composition)");
+        }
 
     } catch (err) {
         alert("Error: " + err.toString());
