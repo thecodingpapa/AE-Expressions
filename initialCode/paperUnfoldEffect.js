@@ -270,20 +270,8 @@ function getSelectedImageLayer() {
 }
 
 function setupSourceImage(imageLayer, comp) {
-    // Fit image to composition dimensions with 20% padding on each side
-    var paddingPercent = 0.2; // 20% padding
-    var targetWidth = comp.width * (1 - paddingPercent * 2);
-    var targetHeight = comp.height * (1 - paddingPercent * 2);
-    
-    // Get source dimensions
-    var source = imageLayer.source;
-    var sourceWidth = source.width;
-    var sourceHeight = source.height;
-    
-    // Calculate scale to fit within composition bounds
-    var scaleX = (targetWidth / sourceWidth) * 100;
-    var scaleY = (targetHeight / sourceHeight) * 100;
-    var scale = Math.min(scaleX, scaleY); // Use smaller scale to maintain aspect ratio
+    // Set image scale to 100% (no padding)
+    var scale = 100; // Fixed 100% scale
     
     // Apply scale
     imageLayer.property("Scale").setValue([scale, scale]);
@@ -292,6 +280,11 @@ function setupSourceImage(imageLayer, comp) {
     var centerX = comp.width / 2;
     var centerY = comp.height / 2;
     imageLayer.property("Position").setValue([centerX, centerY]);
+    
+    // Get source dimensions for anchor point
+    var source = imageLayer.source;
+    var sourceWidth = source.width;
+    var sourceHeight = source.height;
     
     // Center anchor point using source dimensions (works for footage/comp)
     var anchorX = sourceWidth / 2;

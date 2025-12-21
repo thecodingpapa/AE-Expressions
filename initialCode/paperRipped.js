@@ -199,17 +199,24 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             return;
         }
         
-        // Get selected items or prompt user
-        var selectedItems = project.selection;
+        // Check for active composition first
+        var activeComp = app.project.activeItem;
+        if (!activeComp || !(activeComp instanceof CompItem)) {
+            alert("⚠️ NO ACTIVE COMPOSITION DETECTED\n\nPlease follow these steps:\n\n1. Open a composition and click on its timeline\n2. Select an image layer in the composition\n3. Run this script again\n\nThe Paper Rip Effect requires an active composition with a selected image layer.");
+            return;
+        }
+        
+        // Get selected layer from the composition
+        var selectedLayers = activeComp.selectedLayers;
         var mainFootage = null;
         var paperTexture1 = null; // texture for top.jpg
         var paperTexture2 = null; // texture for back.jpg
         
-        // Check if at least one item is selected for main footage
-        if (selectedItems.length >= 1) {
-            mainFootage = selectedItems[0];
+        // Check if at least one layer is selected in the composition
+        if (selectedLayers.length >= 1 && selectedLayers[0] instanceof AVLayer && selectedLayers[0].source) {
+            mainFootage = selectedLayers[0].source;
         } else {
-            alert("Please select your main footage/image first.");
+            alert("Please select an image layer in the composition timeline first.");
             return;
         }
         
@@ -228,7 +235,7 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         
         // Validate that we found the required textures
         if (!mainFootage) {
-            alert("Please select your main footage/image.");
+            alert("Please select a valid image layer in the composition.");
             return;
         }
         if (!paperTexture1) {
@@ -237,13 +244,6 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
         }
         if (!paperTexture2) {
             alert("Could not find 'texture for back.jpg' in the project. Please make sure it's imported.");
-            return;
-        }
-        
-        // Check for active composition before starting the procedure
-        var activeComp = app.project.activeItem;
-        if (!activeComp || !(activeComp instanceof CompItem)) {
-            alert("⚠️ NO ACTIVE COMPOSITION DETECTED\n\nPlease follow these steps:\n\n1. Select your image/footage in the project panel\n2. Open a composition and click on its timeline\n3. Run this script again\n\nThe Paper Rip Effect requires an active composition.");
             return;
         }
         
