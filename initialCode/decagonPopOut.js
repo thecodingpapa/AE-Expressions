@@ -22,19 +22,12 @@
         var baseName = subjectSource.name.replace(/\.[^\.]+$/, "");
 
         // 2. Create Destination Composition
-        // Use 1080x1080 or match active comp if smaller? 
-        // User constraints are around 850px. 1080 is a good safe container.
         var newCompName = "Decagon - " + baseName;
         var newComp = app.project.items.addComp(newCompName, 1200, 1200, 1, currentComp.duration, currentComp.frameRate);
         
-        // Open the new comp (optional, but helpful to see)
         newComp.openInViewer();
 
-        // 3. Add Layers to New Comp
-        // Note: Add Background first (index 2 implies below), Subject second (index 1 implies top).
-        // Actually, AE adds to top.
-        // Add BG first -> It becomes Layer 1.
-        // Add Subject second -> It becomes Layer 1 (pushes BG to 2).
+        // 3. Add Layers
         var bgLayer = newComp.layers.add(bgSource);
         var subjectLayer = newComp.layers.add(subjectSource);
         
@@ -46,7 +39,7 @@
         var subjectHeight = 850;
         var centerPos = [newComp.width / 2, newComp.height / 2];
 
-        // --- Create Shapes (in New Comp) ---
+        // --- Create Shapes ---
         
         // 1. Decagon Frame
         var frameShape = newComp.layers.addShape();
@@ -93,14 +86,7 @@
         var distToBottom = (subjRect.top + subjRect.height - anchorY) * sScale;
         subjectLayer.position.setValue([centerPos[0], frameBottomY - distToBottom]);
 
-        // --- Stacking Order (in New Comp) ---
-        // Stack from Top to Bottom:
-        // 1. Subject Matte
-        // 2. Subject
-        // 3. Frame
-        // 4. BG Matte
-        // 5. BG
-        
+        // --- Stacking Order ---
         bgLayer.moveToBeginning();
         bgMatte.moveToBeginning();
         frameShape.moveToBeginning();
@@ -111,16 +97,26 @@
         safeSetTrackMatte(subjectLayer, subjectMatte);
         safeSetTrackMatte(bgLayer, bgMatte);
 
+        // --- Apply Shadows ---
+        
+        // 1. Frame Shadow (Inner-like on BG)
+        addDropShadow(frameShape, {
+            opacity: 125, // Approx 50% if 255 base. Try generic.
+            distance: 0,
+            softness: 20
+        });
+
+        // 2. Subject Shadow (Outer)
+        addDropShadow(subjectLayer, {
+            opacity: 125,
+            distance: 10,
+            softness: 30
+        });
+
         // --- Place New Comp Logic ---
-        // Add the new comp into the original active comp
         var resultLayer = currentComp.layers.add(newComp);
         resultLayer.moveToBeginning();
         
-        // Optional: Hide original layers?
-        selectedLayers[0].enabled = false;
-        selectedLayers[1].enabled = false;
-        selectedLayers[0].selected = false;
-        selectedLayers[1].selected = false;
         resultLayer.selected = true;
 
         alert("Decagon Pop-Out Composition Created!");
@@ -136,7 +132,7 @@
     function addDecagonShape(shapeLayer, radius, strokeW, isFill) {
         var vectors = shapeLayer.content.addProperty("ADBE Vector Group").content;
         var star = vectors.addProperty("ADBE Vector Shape - Star");
-        star.property("Type").setValue(2); // Polygon
+        star.property("Type").setValue(2);
         star.property("Points").setValue(10);
         star.property("Outer Radius").setValue(radius);
 
@@ -152,21 +148,17 @@
 
     function addPopOutShape(shapeLayer, frameRadius, strokeW, frameSize) {
         var vectors = shapeLayer.content.addProperty("ADBE Vector Group").content;
-        
-        // 1. Inset Decagon (Bottom part)
         var poly = vectors.addProperty("ADBE Vector Shape - Star");
-        poly.property("Type").setValue(2); // Polygon
+        poly.property("Type").setValue(2);
         poly.property("Points").setValue(10);
         poly.property("Outer Radius").setValue(frameRadius - (strokeW/2));
 
-        // 2. Top Rectangle (Pop out part)
         var rect = vectors.addProperty("ADBE Vector Shape - Rect");
         var w = frameSize * 1.5;
         var h = frameSize;
         rect.property("Size").setValue([w, h]);
         rect.property("Position").setValue([0, -h * 0.4]);
 
-        // 3. Fill (Union by default)
         var fill = vectors.addProperty("ADBE Vector Graphic - Fill");
         fill.property("Color").setValue([1, 1, 1]);
     }
@@ -186,6 +178,17 @@
             layer.trackMatteType = TrackMatteType.ALPHA;
         }
         matteLayer.enabled = false;
+    }
+
+    function addDropShadow(layer, options) {
+        try {
+            var effect = layer.Effects.addProperty("ADBE Drop Shadow");
+            if (options.opacity) effect.property("Opacity").setValue(options.opacity); 
+            if (options.distance !== undefined) effect.property("Distance").setValue(options.distance);
+            if (options.softness) effect.property("Softness").setValue(options.softness);
+        } catch(e) {
+            // Ignore
+        }
     }
 
 })();
