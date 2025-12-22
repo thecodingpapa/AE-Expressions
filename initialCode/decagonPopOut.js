@@ -1,218 +1,259 @@
 
 (function createDecagonPopOut() {
 
-    // 1. Validation and Setup
-    
-    var destinationComp = null;
+    // 0. Destination Strategy: First available Composition in Project
+    // We will look for this later if no specific destination is found.
+
+    // 1. Setup & Validation
     var subjectSource = null;
     var bgSource = null;
+    var destinationComp = null;
+    var labelText = "TITLE"; 
 
-    // Check Input Sources from Project Panel
+    // Validate Source Selection (2 Items from Project Panel)
     var selectedItems = app.project.selection;
     var validFootage = [];
 
-    // Collect valid footage/comp items that could be sources
     for (var i = 0; i < selectedItems.length; i++) {
         if (selectedItems[i] instanceof FootageItem || selectedItems[i] instanceof CompItem) {
             validFootage.push(selectedItems[i]);
         }
     }
-    
-    // Attempt Detection of Roles
-    if (validFootage.length === 3) {
-        // Try to find the single Comp among 3 items which would be the destination
+
+    if (validFootage.length === 1) {
+        // Dialog to ask: Foreground or Background?
+        var dlg = new Window("dialog", "Select Source Type");
+        dlg.orientation = "column";
+        dlg.add("statictext", undefined, "Is this image the Foreground (Subject) or Background?");
+        
+        var btnGroup = dlg.add("group");
+        var btnFg = btnGroup.add("button", undefined, "Foreground");
+        var btnBg = btnGroup.add("button", undefined, "Background");
+        
+        var choice = "fg"; // default
+        
+        btnFg.onClick = function() {
+            choice = "fg";
+            dlg.close();
+        }
+        btnBg.onClick = function() {
+            choice = "bg";
+            dlg.close();
+        }
+        
+        dlg.center();
+        dlg.show();
+        
+        if (choice === "fg") {
+            subjectSource = validFootage[0];
+            bgSource = null;
+        } else {
+            bgSource = validFootage[0];
+            subjectSource = null;
+        }
+        
+    } else if (validFootage.length === 2) {
+        subjectSource = validFootage[0];
+        bgSource = validFootage[1];
+    } else if (validFootage.length === 3) {
+        // Try to identify destination from selection (optional override)
         var comps = [];
         var footages = [];
         for (var i = 0; i < validFootage.length; i++) {
              if (validFootage[i] instanceof CompItem) comps.push(validFootage[i]);
              else footages.push(validFootage[i]);
         }
-        
-        // If exactly 1 comp and 2 non-destinations, assume that comp is destination
         if (comps.length === 1 && footages.length === 2) {
-             destinationComp = comps[0];
-             subjectSource = footages[0]; // Assume first is subject
+             destinationComp = comps[0]; // Specific override
+             subjectSource = footages[0];
              bgSource = footages[1];
+        } else {
+             alert("Please select exactly 2 Source Images (Subject & BG).");
+             return;
         }
-    } else if (validFootage.length === 2) {
-         // If 2 items, they must be the sources
-         subjectSource = validFootage[0];
-         bgSource = validFootage[1];
-         
-         // Try Active Item as potential destination
-         if (app.project.activeItem instanceof CompItem) {
-             destinationComp = app.project.activeItem;
-         }
+    } else {
+        alert("Please select 1 or 2 Source Images (Subject & optional BG) in the Project Panel.");
+        return;
     }
-
-    // --- UI Fallback Logic ---
-    // If we have sources but NO destination (because timeline wasn't active), ASK the user.
-    if (subjectSource && bgSource && !destinationComp) {
-        
-        // Gather all comps
-        var allComps = [];
+    
+    // Auto-Select Logic: First Composition in Project
+    if (!destinationComp) {
         for (var i = 1; i <= app.project.items.length; i++) {
             if (app.project.items[i] instanceof CompItem) {
-                allComps.push(app.project.items[i]);
+                destinationComp = app.project.items[i];
+                break; // Found the first one
             }
         }
-
-        if (allComps.length > 0) {
-            var dlg = new Window("dialog", "Select Target Composition");
-            dlg.orientation = "column";
-            dlg.add("statictext", undefined, "Could not detect active composition.");
-            dlg.add("statictext", undefined, "Where should the result be placed?");
-            
-            var list = dlg.add("listbox", [0, 0, 300, 200], []);
-            for (var j = 0; j < allComps.length; j++) {
-                list.add("item", allComps[j].name);
-            }
-            list.selection = 0;
-            
-            var btnGroup = dlg.add("group");
-            var btnSelect = btnGroup.add("button", undefined, "Select Comp", {name: "ok"});
-            var btnStandalone = btnGroup.add("button", undefined, "Create New (Standalone)");
-            var btnCancel = btnGroup.add("button", undefined, "Cancel", {name: "cancel"});
-            
-            btnStandalone.onClick = function() {
-                destinationComp = null; 
-                dlg.close(2); // Return 2
-            }
-            
-            var result = dlg.show();
-            
-            if (result === 1) { // OK (Select)
-                if (list.selection) {
-                    destinationComp = allComps[list.selection.index];
-                }
-            } else if (result === 2) { // Standalone
-                destinationComp = null;
-            } else { // Cancel
-                return; // Exit script
-            }
-        }
-    }
-
-    // Final Validation of Sources
-    if (!subjectSource || !bgSource) {
-         alert("Please select 2 Source Images (Subject & Background) in the Project Panel.");
-         return;
     }
 
     app.beginUndoGroup("Create Decagon Pop-Out");
 
     try {
-        var baseName = subjectSource.name.replace(/\.[^\.]+$/, "");
-
-        // 2. Create Destination Composition (The Wrapper)
-        // Use destinationComp specs if available, else standard.
-        var compWidth = destinationComp ? destinationComp.width : 1920;
-        var compHeight = destinationComp ? destinationComp.height : 1080;
-        var compDur = destinationComp ? destinationComp.duration : 10;
-        var compFPS = destinationComp ? destinationComp.frameRate : 30;
-
-        var newCompName = "Decagon - " + baseName;
-        // avoid potential name collision or assume unique
-        var newComp = app.project.items.addComp(newCompName, 1200, 1200, 1, compDur, compFPS);
+        var baseName;
+        if (subjectSource) {
+             baseName = subjectSource.name.replace(/\.[^\.]+$/, "");
+        } else {
+             baseName = bgSource.name.replace(/\.[^\.]+$/, "");
+        }
         
-        newComp.openInViewer();
+        // --- Create Folders ---
+        // 1. Root: "Decagon"
+        var rootFolder = getOrCreateFolder("Decagon", null);
+        // 2. Sub: [Title] (Use baseName for uniqueness and relevance)
+        var subFolder = getOrCreateFolder(baseName, rootFolder);
 
-        // 3. Add Layers
-        var bgLayer = newComp.layers.add(bgSource);
-        var subjectLayer = newComp.layers.add(subjectSource);
-        
-        // Parameters
-        var frameSize = 724;
+        // --- 1. Create Pre-Compositions ---
+        var pcSize = 2000;
+        var pcDur = destinationComp ? destinationComp.duration : 10;
+        var pcFPS = destinationComp ? destinationComp.frameRate : 30;
+
+        // PC - Subject
+        var pcSubject = null;
+        if (subjectSource) {
+            var pcSubjectName = "PC - Subject - " + baseName;
+            pcSubject = app.project.items.addComp(pcSubjectName, pcSize, pcSize, 1, pcDur, pcFPS);
+            pcSubject.layers.add(subjectSource); 
+            pcSubject.parentFolder = subFolder; // Move to folder
+        }
+
+        // PC - Background
+        var pcBGName = "PC - BG - " + baseName;
+        var pcBG = app.project.items.addComp(pcBGName, pcSize, pcSize, 1, pcDur, pcFPS);
+        if (bgSource) {
+            pcBG.layers.add(bgSource); 
+        } else {
+            pcBG.layers.addSolid([1, 1, 1], "White Background", pcSize, pcSize, 1);
+        }
+        pcBG.parentFolder = subFolder; // Move to folder
+
+        // --- 2. Create Main Wrapper Composition ---
+        var newCompName = "USE THIS - " + baseName;
+        var newComp = app.project.items.addComp(newCompName, 1200, 1200, 1, pcDur, pcFPS);
+        newComp.parentFolder = subFolder; // Move to folder
+        newComp.openInViewer(); 
+
+        var centerPos = [newComp.width / 2, newComp.height / 2];
+        var frameSize = 724; 
         var frameRadius = frameSize / 2;
         var strokeWidth = 12;
-        var bgSize = 700;
-        var subjectHeight = 850;
-        var centerPos = [newComp.width / 2, newComp.height / 2];
 
-        // --- Create Shapes (in New Comp) ---
+        // --- 3. Add Layers (The Pre-Comps) ---
+        var bgLayer = newComp.layers.add(pcBG);          
+        var subjectLayer = null;
+        if (pcSubject) {
+            subjectLayer = newComp.layers.add(pcSubject); 
+        } 
         
-        // 1. Decagon Frame
+        // --- Create Shapes ---
         var frameShape = newComp.layers.addShape();
         frameShape.name = "Decagon Frame";
-        addDecagonShape(frameShape, frameRadius, strokeWidth, false); // Stroke only
+        addDecagonShape(frameShape, frameRadius, strokeWidth, false);
         frameShape.position.setValue(centerPos);
 
-        // 2. Background Matte
         var bgMatte = newComp.layers.addShape();
         bgMatte.name = "Background Matte";
-        addDecagonShape(bgMatte, frameRadius, 0, true); // Fill only
+        addDecagonShape(bgMatte, frameRadius, 0, true);
         bgMatte.position.setValue(centerPos);
 
-        // 3. Subject Matte (Pop-Out)
-        var subjectMatte = newComp.layers.addShape();
-        subjectMatte.name = "Subject Pop-Out Matte";
-        addPopOutShape(subjectMatte, frameRadius, strokeWidth, frameSize);
-        subjectMatte.position.setValue(centerPos);
+        var subjectMatte = null;
+        if (subjectSource) {
+            subjectMatte = newComp.layers.addShape();
+            subjectMatte.name = "Subject Pop-Out Matte";
+            addPopOutShape(subjectMatte, frameRadius, strokeWidth, frameSize);
+            subjectMatte.position.setValue(centerPos);
+        }
 
-        // --- Process Transforms ---
+        // --- Transforms ---
+        // BG Fit (800 target) with Source Scale logic
+        var targetBgSize = 800;
 
-        // Background
-        if (bgLayer.width > 0) {
-            var bgScaleVal = 100;
-            var scaleX = (bgSize / bgLayer.width) * 100;
-            var scaleY = (bgSize / bgLayer.height) * 100;
-            bgScaleVal = Math.max(scaleX, scaleY);
-            bgLayer.property("Scale").setValue([bgScaleVal, bgScaleVal]);
+        if (bgSource && bgLayer.width > 0) {
+            var sW = bgSource.width;
+            var sH = bgSource.height;
+            var scaleX = (targetBgSize / sW) * 100;
+            var scaleY = (targetBgSize / sH) * 100;
+            var reqScale = Math.max(scaleX, scaleY);
+            bgLayer.property("Scale").setValue([reqScale, reqScale]);
         }
         bgLayer.position.setValue(centerPos);
 
-        // Subject
+        // Subject Align (Height 850)
         var subScaleVal = 100;
-        if (subjectLayer.height > 0) {
-            subScaleVal = (subjectHeight / subjectLayer.height) * 100;
-            subjectLayer.property("Scale").setValue([subScaleVal, subScaleVal]);
+        if (subjectLayer && subjectSource) {
+            var targetSubjectHeight = 850;
+            if (subjectLayer.height > 0) {
+                var originalH = subjectSource.height; 
+                subScaleVal = (targetSubjectHeight / originalH) * 100;
+                subjectLayer.property("Scale").setValue([subScaleVal, subScaleVal]);
+            }
+            
+            var frameBottomY = centerPos[1] + frameRadius;
+            var originalH = subjectSource.height;
+            var sScale = subScaleVal / 100;
+            var distToBottom = (originalH / 2) * sScale;
+            
+            subjectLayer.position.setValue([centerPos[0], frameBottomY - distToBottom]);
         }
 
-        // Subject Align Bottom
-        var frameBottomY = centerPos[1] + frameRadius;
-        var subjRect = subjectLayer.sourceRectAtTime(0, false);
-        var sScale = subScaleVal / 100;
-        var anchorY = subjectLayer.anchorPoint.value[1];
-        var distToBottom = (subjRect.top + subjRect.height - anchorY) * sScale;
-        subjectLayer.position.setValue([centerPos[0], frameBottomY - distToBottom]);
-
-        // --- Stacking Order ---
+        // --- Stacking ---
         bgLayer.moveToBeginning();
         bgMatte.moveToBeginning();
         frameShape.moveToBeginning();
-        subjectLayer.moveToBeginning();
-        subjectMatte.moveToBeginning();
+        if (subjectLayer) subjectLayer.moveToBeginning();
+        if (subjectMatte) subjectMatte.moveToBeginning();
 
-        // --- Apply Mattes ---
-        safeSetTrackMatte(subjectLayer, subjectMatte);
+        // --- Mattes ---
+        if (subjectLayer && subjectMatte) safeSetTrackMatte(subjectLayer, subjectMatte);
         safeSetTrackMatte(bgLayer, bgMatte);
 
-        // --- Apply Shadows ---
-        addDropShadow(frameShape, {
-            opacity: 125, // ~50%
-            distance: 0,
-            softness: 20
-        });
+        // --- Shadows ---
+        addDropShadow(frameShape, { opacity: 125, distance: 0, softness: 20 });
+        if (subjectLayer) addDropShadow(subjectLayer, { opacity: 125, distance: 10, softness: 30 });
 
-        addDropShadow(subjectLayer, {
-            opacity: 125, // ~50%
-            distance: 10,
-            softness: 30
-        });
+        // --- 4. Add Text Label ---
+        if (labelText && labelText.length > 0) {
+            var textLayer = newComp.layers.addText(labelText);
+            var textProp = textLayer.property("Source Text");
+            var textDoc = textProp.value;
+            
+            textDoc.font = "MElleHK-Medium"; 
+            textDoc.fontSize = 60; 
+            textDoc.fillColor = [1, 1, 1]; // White
+            textDoc.tracking = 0;
+            textDoc.justification = ParagraphJustification.CENTER_JUSTIFY;
+            textProp.setValue(textDoc);
+            
+            textLayer.position.setValue([centerPos[0], centerPos[1] + frameRadius]);
 
-        // --- Place New Comp Logic ---
+            // === Effect Stack ===
+            // 1. Shift Channels: Take Alpha From = 9 
+            var shift = textLayer.Effects.addProperty("ADBE Shift Channels");
+            shift.property("Take Alpha From").setValue(9); 
+
+            // 2. Fill: Black
+            var fill = textLayer.Effects.addProperty("ADBE Fill");
+            fill.property("Color").setValue([0, 0, 0]);
+
+            // 3. Minimax: Op=2, Chan=2, Rad=24
+            var minimax = textLayer.Effects.addProperty("ADBE Minimax");
+            minimax.property("Operation").setValue(2); // Maximum 
+            minimax.property("Radius").setValue(24); 
+            minimax.property("Channel").setValue(2); // Alpha/Color
+
+            // 4. CC Composite
+            var composite = textLayer.Effects.addProperty("CC Composite");
+            try { composite.property("Composite Original").setValue(1); } catch(e) {}
+        }
+
+        // --- Placement (Final Step) ---
         if (destinationComp) {
-            // Add new comp to destination
-            var resultLayer = destinationComp.layers.add(newComp);
-            resultLayer.moveToBeginning();
-            resultLayer.selected = true;
-            
-            // Switch view to destination comp
+            var resLayer = destinationComp.layers.add(newComp);
+            resLayer.moveToBeginning();
+            resLayer.selected = true;
+            // Restore context: open the destination (First Comp)
             destinationComp.openInViewer();
-            
-            alert("Decagon Pop-Out Created in '" + destinationComp.name + "'!");
         } else {
-            alert("Decagon Pop-Out Created!\n(Opened as new composition)");
+            // Standalone
         }
 
     } catch (err) {
@@ -222,6 +263,19 @@
     }
 
     // --- Helpers ---
+    function getOrCreateFolder(name, parentFolder) {
+        for (var i = 1; i <= app.project.items.length; i++) {
+            var item = app.project.items[i];
+            if (item instanceof FolderItem && item.name === name) {
+                if (parentFolder && item.parentFolder !== parentFolder) continue;
+                if (!parentFolder && item.parentFolder !== app.project.rootFolder) continue;
+                return item;
+            }
+        }
+        var newFolder = app.project.items.addFolder(name);
+        if (parentFolder) newFolder.parentFolder = parentFolder;
+        return newFolder;
+    }
 
     function addDecagonShape(shapeLayer, radius, strokeW, isFill) {
         var vectors = shapeLayer.content.addProperty("ADBE Vector Group").content;
@@ -229,60 +283,42 @@
         star.property("Type").setValue(2);
         star.property("Points").setValue(10);
         star.property("Outer Radius").setValue(radius);
-
         if (isFill) {
-            var fill = vectors.addProperty("ADBE Vector Graphic - Fill");
-            fill.property("Color").setValue([1, 1, 1]);
+            vectors.addProperty("ADBE Vector Graphic - Fill").property("Color").setValue([1, 1, 1]);
         } else {
-            var stroke = vectors.addProperty("ADBE Vector Graphic - Stroke");
-            stroke.property("Color").setValue([0, 0, 0]);
-            stroke.property("Stroke Width").setValue(strokeW);
+            var s = vectors.addProperty("ADBE Vector Graphic - Stroke");
+            s.property("Color").setValue([0, 0, 0]);
+            s.property("Stroke Width").setValue(strokeW);
         }
     }
-
     function addPopOutShape(shapeLayer, frameRadius, strokeW, frameSize) {
         var vectors = shapeLayer.content.addProperty("ADBE Vector Group").content;
         var poly = vectors.addProperty("ADBE Vector Shape - Star");
         poly.property("Type").setValue(2);
         poly.property("Points").setValue(10);
         poly.property("Outer Radius").setValue(frameRadius - (strokeW/2));
-
         var rect = vectors.addProperty("ADBE Vector Shape - Rect");
-        var w = frameSize * 1.5;
-        var h = frameSize;
-        rect.property("Size").setValue([w, h]);
-        rect.property("Position").setValue([0, -h * 0.4]);
-
-        var fill = vectors.addProperty("ADBE Vector Graphic - Fill");
-        fill.property("Color").setValue([1, 1, 1]);
+        rect.property("Size").setValue([frameSize * 1.5, frameSize]);
+        rect.property("Position").setValue([0, -frameSize * 0.4]);
+        vectors.addProperty("ADBE Vector Graphic - Fill").property("Color").setValue([1, 1, 1]);
     }
-
     function safeSetTrackMatte(layer, matteLayer) {
         if (!layer || !matteLayer) return;
         try {
-            if (typeof layer.setTrackMatte === "function") {
-               layer.setTrackMatte(matteLayer, TrackMatteType.ALPHA);
-            } else {
-                throw "Legacy";
-            }
+            if (typeof layer.setTrackMatte === "function") layer.setTrackMatte(matteLayer, TrackMatteType.ALPHA);
+            else throw "Legacy";
         } catch (e) {
-            if (matteLayer.index !== layer.index - 1) {
-                matteLayer.moveBefore(layer);
-            }
+            if (matteLayer.index !== layer.index - 1) matteLayer.moveBefore(layer);
             layer.trackMatteType = TrackMatteType.ALPHA;
         }
         matteLayer.enabled = false;
     }
-
     function addDropShadow(layer, options) {
         try {
             var effect = layer.Effects.addProperty("ADBE Drop Shadow");
             if (options.opacity) effect.property("Opacity").setValue(options.opacity); 
             if (options.distance !== undefined) effect.property("Distance").setValue(options.distance);
             if (options.softness) effect.property("Softness").setValue(options.softness);
-        } catch(e) {
-            // Ignore
-        }
+        } catch(e) {}
     }
-
 })();
