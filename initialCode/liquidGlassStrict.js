@@ -146,11 +146,11 @@
         // Add slider controls
         var widthSlider = controlNull.Effects.addProperty("ADBE Slider Control");
         widthSlider.name = "Width";
-        widthSlider.property("Slider").setValue(comp.width * 0.4);
+        widthSlider.property("Slider").setValue(comp.width * 0.2);
         
         var heightSlider = controlNull.Effects.addProperty("ADBE Slider Control");
         heightSlider.name = "Height";
-        heightSlider.property("Slider").setValue(comp.height * 0.4);
+        heightSlider.property("Slider").setValue(comp.width * 0.2);
         
         var roundSlider = controlNull.Effects.addProperty("ADBE Slider Control");
         roundSlider.name = "Roundness";
@@ -356,6 +356,18 @@
         
         // Parent Main Graphic to control null for position control
         mainGraphic.parent = controlNull;
+        
+        // ==========================================
+        // 6. Select Main Graphic Layer
+        // ==========================================
+        
+        // Deselect all layers first
+        for (var i = 1; i <= comp.numLayers; i++) {
+            comp.layer(i).selected = false;
+        }
+        
+        // Select only Main Graphic
+        mainGraphic.selected = true;
 
     } catch (e) {
         alert("Error: " + e.toString() + " on line " + e.line);
