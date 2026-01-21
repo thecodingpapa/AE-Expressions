@@ -116,6 +116,7 @@
         // ==========================================
         
         var controlNull = comp.layers.addNull();
+        controlNull.name = "Size Control";
         
         // Add slider controls
         var widthSlider = controlNull.Effects.addProperty("ADBE Slider Control");
@@ -129,6 +130,10 @@
         var roundSlider = controlNull.Effects.addProperty("ADBE Slider Control");
         roundSlider.name = "Roundness";
         roundSlider.property("Slider").setValue(60);
+        
+        var blurSlider = controlNull.Effects.addProperty("ADBE Slider Control");
+        blurSlider.name = "Center Blur";
+        blurSlider.property("Slider").setValue(5);
         
         // Set name AFTER adding effects to ensure it sticks
         controlNull.name = "Size Control";
@@ -163,12 +168,27 @@
         
         var blur1 = addEffect(mainGraphic, "FAST_BOX_BLUR");
         setBlurRadius(blur1, 5);
+        
+        // Link Main Graphic blur to control null
+        var blurProp = blur1.property("Blur Radius") || blur1.property("Radius") || blur1.property("Blurriness");
+        if (blurProp) {
+            blurProp.expression = 'thisComp.layer("Size Control").effect("Center Blur")("Slider")';
+        }
 
 
         // --- Displacement Map Layer ("Map") ---
         var mapLayer = mainGraphic.duplicate();
         mapLayer.moveAfter(mainGraphic); 
         mapLayer.name = "Map";
+
+        //Remove Blur Radius expressions
+        var mapBlurEffect = mapLayer.Effects.property(1);
+        if (mapBlurEffect) {
+            var mapBlurProp = mapBlurEffect.property("Blur Radius") || mapBlurEffect.property("Radius") || mapBlurEffect.property("Blurriness");
+            if (mapBlurProp && mapBlurProp.expression) {
+                mapBlurProp.expression = "";
+            }
+        }
         
         var mapFill = mapLayer.content.property("ADBE Vector Group").content.property("ADBE Vector Graphic - Fill");
         mapFill.enabled = false;
@@ -210,6 +230,16 @@
         // --- Outer Edge (Soft) ("Stroke") ---
         var strokeLayer = mainGraphic.duplicate();
         strokeLayer.name = "Stroke";
+
+        // Remove Blur Radius expression inherited from Main Graphic
+        var strokeBlurEffect = strokeLayer.Effects.property(1);
+        if (strokeBlurEffect) {
+            var strokeBlurProp = strokeBlurEffect.property("Blur Radius") || strokeBlurEffect.property("Radius") || strokeBlurEffect.property("Blurriness");
+            if (strokeBlurProp && strokeBlurProp.expression) {
+                strokeBlurProp.expression = "";
+            }
+        }
+        
         
         var strokeFill = strokeLayer.content.property("ADBE Vector Group").content.property("ADBE Vector Graphic - Fill");
         strokeFill.enabled = false;
