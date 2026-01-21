@@ -101,6 +101,28 @@
             try { styles.remove(); } catch(e) {} // Try removing the group entirely if possible
         }
     }
+    
+    function getUniqueName(comp, baseName) {
+        var name = baseName;
+        var counter = 1;
+        var exists = false;
+        
+        do {
+            exists = false;
+            for (var i = 1; i <= comp.numLayers; i++) {
+                if (comp.layer(i).name === name) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) {
+                counter++;
+                name = baseName + " " + counter;
+            }
+        } while (exists);
+        
+        return name;
+    }
 
     app.beginUndoGroup(UNDO_NAME);
 
@@ -115,8 +137,11 @@
         // 0. Control Null Setup
         // ==========================================
         
+        var controlNullBaseName = "USE THIS TO CONTROL";
+        var controlNullName = getUniqueName(comp, controlNullBaseName);
+        
         var controlNull = comp.layers.addNull();
-        controlNull.name = "Size Control";
+        controlNull.source.name = controlNullName;
         
         // Add slider controls
         var widthSlider = controlNull.Effects.addProperty("ADBE Slider Control");
@@ -134,27 +159,25 @@
         var blurSlider = controlNull.Effects.addProperty("ADBE Slider Control");
         blurSlider.name = "Center Blur";
         blurSlider.property("Slider").setValue(5);
-        
-        // Set name AFTER adding effects to ensure it sticks
-        controlNull.name = "Size Control";
 
         // ==========================================
         // 1. Shape and Distortion Setup
         // ==========================================
 
         // --- Base Shape ---
+        var mainGraphicName = getUniqueName(comp, "Main Graphic");
         var mainGraphic = comp.layers.addShape();
-        mainGraphic.name = "Main Graphic";
+        mainGraphic.name = mainGraphicName;
         
         var shapeGroup = mainGraphic.content.addProperty("ADBE Vector Group");
         var rect = shapeGroup.content.addProperty("ADBE Vector Shape - Rect");
         
         // Add expressions to link to control null
-        var sizeExpr = 'var ctrl = thisComp.layer("Size Control");\n';
+        var sizeExpr = 'var ctrl = thisComp.layer("' + controlNullName + '");\n';
         sizeExpr += '[ctrl.effect("Width")("Slider"), ctrl.effect("Height")("Slider")]';
         rect.property("Size").expression = sizeExpr;
         
-        var roundExpr = 'thisComp.layer("Size Control").effect("Roundness")("Slider")';
+        var roundExpr = 'thisComp.layer("' + controlNullName + '").effect("Roundness")("Slider")';
         rect.property("Roundness").expression = roundExpr;
                 
         var fill = shapeGroup.content.addProperty("ADBE Vector Graphic - Fill");
@@ -172,14 +195,14 @@
         // Link Main Graphic blur to control null
         var blurProp = blur1.property("Blur Radius") || blur1.property("Radius") || blur1.property("Blurriness");
         if (blurProp) {
-            blurProp.expression = 'thisComp.layer("Size Control").effect("Center Blur")("Slider")';
+            blurProp.expression = 'thisComp.layer("' + controlNullName + '").effect("Center Blur")("Slider")';
         }
 
 
         // --- Displacement Map Layer ("Map") ---
         var mapLayer = mainGraphic.duplicate();
         mapLayer.moveAfter(mainGraphic); 
-        mapLayer.name = "Map";
+        mapLayer.name = getUniqueName(comp, "Map");
 
         //Remove Blur Radius expressions
         var mapBlurEffect = mapLayer.Effects.property(1);
@@ -229,7 +252,7 @@
 
         // --- Outer Edge (Soft) ("Stroke") ---
         var strokeLayer = mainGraphic.duplicate();
-        strokeLayer.name = "Stroke";
+        strokeLayer.name = getUniqueName(comp, "Stroke");
 
         // Remove Blur Radius expression inherited from Main Graphic
         var strokeBlurEffect = strokeLayer.Effects.property(1);
@@ -255,7 +278,7 @@
 
         // --- Defined Highlight Edge (Hard) ("Edge") ---
         var edgeLayer = strokeLayer.duplicate();
-        edgeLayer.name = "Edge";
+        edgeLayer.name = getUniqueName(comp, "Edge");
         
         removeAllEffects(edgeLayer);
         edgeLayer.adjustmentLayer = false;
@@ -274,7 +297,7 @@
 
         // --- Subtle Edge (Glow) ("Light Edge") ---
         var lightEdgeLayer = edgeLayer.duplicate();
-        lightEdgeLayer.name = "Light Edge";
+        lightEdgeLayer.name = getUniqueName(comp, "Light Edge");
         
         var lightEdgeBlur = lightEdgeLayer.Effects.property(1); // The Blur we just added
         if(lightEdgeBlur) setBlurRadius(lightEdgeBlur, 40);
@@ -286,7 +309,7 @@
         // ==========================================
         
         var outsideLayer = lightEdgeLayer.duplicate();
-        outsideLayer.name = "Outside"; 
+        outsideLayer.name = getUniqueName(comp, "Outside"); 
         
         removeAllEffects(outsideLayer);
         
@@ -305,7 +328,7 @@
 
         // --- Bevel Highlights ---
         var bevelMain = mainGraphic.duplicate();
-        bevelMain.name = "Bevel Highlights";
+        bevelMain.name = getUniqueName(comp, "Bevel Highlights");
         
         removeAllEffects(bevelMain);
         bevelMain.adjustmentLayer = false; 
