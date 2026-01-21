@@ -112,6 +112,28 @@
         }
 
         // ==========================================
+        // 0. Control Null Setup
+        // ==========================================
+        
+        var controlNull = comp.layers.addNull();
+        
+        // Add slider controls
+        var widthSlider = controlNull.Effects.addProperty("ADBE Slider Control");
+        widthSlider.name = "Width";
+        widthSlider.property("Slider").setValue(comp.width * 0.4);
+        
+        var heightSlider = controlNull.Effects.addProperty("ADBE Slider Control");
+        heightSlider.name = "Height";
+        heightSlider.property("Slider").setValue(comp.height * 0.4);
+        
+        var roundSlider = controlNull.Effects.addProperty("ADBE Slider Control");
+        roundSlider.name = "Roundness";
+        roundSlider.property("Slider").setValue(60);
+        
+        // Set name AFTER adding effects to ensure it sticks
+        controlNull.name = "Size Control";
+
+        // ==========================================
         // 1. Shape and Distortion Setup
         // ==========================================
 
@@ -121,9 +143,15 @@
         
         var shapeGroup = mainGraphic.content.addProperty("ADBE Vector Group");
         var rect = shapeGroup.content.addProperty("ADBE Vector Shape - Rect");
-        rect.property("Size").setValue([comp.width * 0.4, comp.height * 0.4]); 
-        rect.property("Roundness").setValue(60); 
         
+        // Add expressions to link to control null
+        var sizeExpr = 'var ctrl = thisComp.layer("Size Control");\n';
+        sizeExpr += '[ctrl.effect("Width")("Slider"), ctrl.effect("Height")("Slider")]';
+        rect.property("Size").expression = sizeExpr;
+        
+        var roundExpr = 'thisComp.layer("Size Control").effect("Roundness")("Slider")';
+        rect.property("Roundness").expression = roundExpr;
+                
         var fill = shapeGroup.content.addProperty("ADBE Vector Graphic - Fill");
         fill.property("Color").setValue([1, 1, 1]); 
         
@@ -272,6 +300,9 @@
         for (var i = 0; i < children.length; i++) {
             if (children[i]) children[i].parent = mainGraphic;
         }
+        
+        // Parent Main Graphic to control null for position control
+        mainGraphic.parent = controlNull;
 
     } catch (e) {
         alert("Error: " + e.toString() + " on line " + e.line);
