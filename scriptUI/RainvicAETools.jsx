@@ -1,5 +1,5 @@
 {
-  var version = "1.3";
+  var version = "2.0";
   function showSoftNotification(message, duration) {
     var notificationWindow = new Window("palette", "Notification", undefined, {
       closeButton: false,
@@ -2436,6 +2436,118 @@
     instructions.preferredSize.width = 400;
     instructions.color = [0.5, 0.5, 0.5];
 
+    // TAB4 - Scripts
+    // ====
+    var tabScripts = tpanel1.add("tab", undefined, undefined, { name: "tabScripts" });
+    tabScripts.text = "Scripts";
+    tabScripts.orientation = "column";
+    tabScripts.alignChildren = ["left", "top"];
+    tabScripts.spacing = 10;
+    tabScripts.margins = 10;
+    
+    var addScriptBtnGroup = tabScripts.add("group");
+    addScriptBtnGroup.orientation = "row";
+    addScriptBtnGroup.alignChildren = ["left", "center"];
+    var addScriptBtn = addScriptBtnGroup.add("button", undefined, "+ Add Script");
+    addScriptBtn.size = [80, 25];
+
+    var scriptsGridGroup = tabScripts.add("group");
+    scriptsGridGroup.orientation = "column";
+    scriptsGridGroup.alignChildren = ["left", "top"];
+    scriptsGridGroup.spacing = 5;
+
+    function refreshScriptsGrid() {
+        // Remove existing children from scriptsGridGroup
+        while (scriptsGridGroup.children.length > 0) {
+            scriptsGridGroup.remove(scriptsGridGroup.children[0]);
+        }
+        
+        var scriptsFolder = new Folder(Folder.userData.fsName + "/RainvicToolsScripts");
+        if (!scriptsFolder.exists) {
+            scriptsFolder.create();
+        }
+        var files = scriptsFolder.getFiles("*.js");
+
+        var maxCols = 3;
+        var currentRow;
+        for (var i = 0; i < files.length; i++) {
+            if (i % maxCols === 0) {
+                currentRow = scriptsGridGroup.add("group");
+                currentRow.orientation = "row";
+                currentRow.spacing = 5;
+            }
+            var title = decodeURI(files[i].name).replace(".js", "");
+            var btn = currentRow.add("button", undefined, title);
+            btn.size = [80, 80];
+            btn.scriptFile = files[i];
+            btn.onClick = function() {
+                try {
+                    this.scriptFile.open("r");
+                    var scriptContent = this.scriptFile.read();
+                    this.scriptFile.close();
+                    eval(scriptContent);
+                } catch(e) {
+                    alert("Error executing script: " + e.toString());
+                }
+            };
+            btn.helpTip = "Click to execute: " + title;
+        }
+        
+        scriptsGridGroup.layout.layout(true);
+        if (typeof dialog !== "undefined" && dialog !== null) {
+             dialog.layout.layout(true);
+        }
+    }
+    
+    refreshScriptsGrid();
+
+    addScriptBtn.onClick = function() {
+       var addWin = new Window("palette", "Add New Script", undefined, {resizeable: true});
+       addWin.orientation = "column";
+       addWin.alignChildren = ["left", "top"];
+       addWin.spacing = 10;
+       
+       var titleGroup = addWin.add("group");
+       titleGroup.add("statictext", undefined, "Title:");
+       var titleInput = titleGroup.add("edittext", undefined, "My New Script");
+       titleInput.characters = 20;
+
+       addWin.add("statictext", undefined, "Script Code:");
+       var codeInput = addWin.add("edittext", undefined, "", {multiline: true, scrollable: true});
+       codeInput.size = [300, 200];
+       
+       var btnGroup = addWin.add("group");
+       btnGroup.orientation = "row";
+       btnGroup.alignChildren = ["center", "center"];
+       var btnAdd = btnGroup.add("button", undefined, "Add");
+       var btnCancel = btnGroup.add("button", undefined, "Cancel");
+       
+       btnCancel.onClick = function() { addWin.close(); };
+       btnAdd.onClick = function() {
+            var scriptName = titleInput.text;
+            if (!scriptName) { alert("Please enter a title."); return; }
+            var code = codeInput.text;
+            
+            var scriptsFolder = new Folder(Folder.userData.fsName + "/RainvicToolsScripts");
+            if (!scriptsFolder.exists) scriptsFolder.create();
+            
+            // Basic sanitization for file name
+            var safeName = scriptName.split("/").join("").split("\\\\").join("").split(":").join("").split("*").join("").split("?").join("").split("\\"").join("").split("<").join("").split(">").join("").split("|").join("");
+            var newFile = new File(scriptsFolder.fsName + "/" + safeName + ".js");
+            if(newFile.exists) {
+                if(!confirm("A script with this title already exists. Overwrite?")) return;
+            }
+            newFile.open("w");
+            newFile.write(code);
+            newFile.close();
+            
+            addWin.close();
+            refreshScriptsGrid();
+       };
+       
+       addWin.center();
+       addWin.show();
+    };
 
     dialog.layout.layout(true);
 
