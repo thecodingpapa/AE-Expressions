@@ -129,6 +129,42 @@ function createFoldingAnimComposition() {
             return existingComp;
         }
         
+        // --- NEW: Dynamic Cloud Import Logic ---
+        function importAssetsIfNeeded() {
+            var targetName = "Paper Crumple Effect.mp4";
+            var relativePath = "/My Drive/RainIsHere/Utilt/AE templates/[IMPORTS]/Paper Crumple Effect.mp4";
+
+            // If it's already in the project, we skip
+            if (findItemByName(targetName)) return;
+
+            var cloudRoot = new Folder("~/Library/CloudStorage");
+            if (!cloudRoot.exists) return;
+            
+            var folders = cloudRoot.getFiles();
+            for (var i = 0; i < folders.length; i++) {
+                var f = folders[i];
+                // Check if it's a mapped Google Drive folder
+                if (f instanceof Folder && f.name.indexOf("GoogleDrive") !== -1) {
+                    var targetFile = new File(f.fsName + relativePath);
+                    
+                    if (targetFile.exists) {
+                        try {
+                            app.project.importFile(new ImportOptions(targetFile));
+                        } catch (err) {
+                            // Silent catch: standard validation below will handle missing files
+                        }
+                        return; // Successfully imported
+                    }
+                }
+            }
+            
+            alert("Notice:\nThe 'Paper Crumple Effect.mp4' was NOT found in your Google Drive folder locally.\n\nPlease ensure your Google Drive is running and synced.");
+        }
+
+        // Run the dynamic import before looking for the video
+        importAssetsIfNeeded();
+        // ----------------------------------------
+        
         // Find required footage item
         var paperCrumpleVideo = findItemByName("Paper Crumple Effect.mp4");
         

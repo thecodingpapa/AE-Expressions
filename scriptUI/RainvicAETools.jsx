@@ -2450,14 +2450,69 @@
     addScriptBtnGroup.alignChildren = ["left", "center"];
     var addScriptBtn = addScriptBtnGroup.add("button", undefined, "+ Add Script");
     addScriptBtn.size = [80, 25];
+    
+    var editModeBtn = addScriptBtnGroup.add("button", undefined, "Edit");
+    editModeBtn.size = [60, 25];
+    
+    var githubBtn = addScriptBtnGroup.add("button", undefined, "Get GitHub Codes");
+    githubBtn.size = [130, 25];
+    githubBtn.onClick = function() {
+        var url = "https://github.com/thecodingpapa/AE-Expressions/tree/main/initialCode";
+        if ($.os.indexOf("Windows") !== -1) {
+            system.callSystem("cmd /c \"start " + url + "\"");
+        } else {
+            system.callSystem("open \"" + url + "\"");
+        }
+    };
 
     var scriptsGridGroup = tabScripts.add("group");
     scriptsGridGroup.orientation = "column";
     scriptsGridGroup.alignChildren = ["left", "top"];
     scriptsGridGroup.spacing = 5;
 
+    var isEditMode = false;
+    var swapSourceFile = null;
+
+    editModeBtn.onClick = function() {
+        isEditMode = !isEditMode;
+        if (isEditMode) {
+            editModeBtn.text = "Done";
+            swapSourceFile = null; // reset selection
+        } else {
+            editModeBtn.text = "Edit";
+        }
+        refreshScriptsGrid();
+    };
+
+    function readOrderMap(scriptsFolder) {
+        var orderFile = new File(scriptsFolder.fsName + "/order.json");
+        var orderArr = [];
+        if (orderFile.exists) {
+            try {
+                orderFile.open("r");
+                var content = orderFile.read();
+                orderFile.close();
+                content = content.replace(/[\\[\\]"]/g, "");
+                if (content.length > 0) {
+                    orderArr = content.split(",");
+                }
+            } catch(e) {}
+        }
+        return orderArr;
+    }
+
+    function writeOrderMap(scriptsFolder, filesArray) {
+        var orderFile = new File(scriptsFolder.fsName + "/order.json");
+        var nameArr = [];
+        for (var i = 0; i < filesArray.length; i++) {
+            nameArr.push('"' + decodeURI(filesArray[i].name) + '"');
+        }
+        orderFile.open("w");
+        orderFile.write("[" + nameArr.join(",") + "]");
+        orderFile.close();
+    }
+
     function refreshScriptsGrid() {
-        // Remove existing children from scriptsGridGroup
         while (scriptsGridGroup.children.length > 0) {
             scriptsGridGroup.remove(scriptsGridGroup.children[0]);
         }
@@ -2467,6 +2522,28 @@
             scriptsFolder.create();
         }
         var files = scriptsFolder.getFiles("*.js");
+        
+        var orderArr = readOrderMap(scriptsFolder);
+        
+        files.sort(function(a, b) {
+            var indexA = orderArr.length;
+            var indexB = orderArr.length;
+            var nameA = decodeURI(a.name);
+            var nameB = decodeURI(b.name);
+            
+            for (var i = 0; i < orderArr.length; i++) {
+                if (orderArr[i] === nameA) indexA = i;
+                if (orderArr[i] === nameB) indexB = i;
+            }
+            if (indexA === indexB) {
+                if (nameA < nameB) return -1;
+                if (nameA > nameB) return 1;
+                return 0;
+            }
+            return indexA - indexB;
+        });
+
+        writeOrderMap(scriptsFolder, files);
 
         var maxCols = 3;
         var currentRow;
@@ -2476,21 +2553,7 @@
                 currentRow.orientation = "row";
                 currentRow.spacing = 5;
             }
-            var title = decodeURI(files[i].name).replace(".js", "");
-            var btn = currentRow.add("button", undefined, title);
-            btn.size = [80, 80];
-            btn.scriptFile = files[i];
-            btn.onClick = function() {
-                try {
-                    this.scriptFile.open("r");
-                    var scriptContent = this.scriptFile.read();
-                    this.scriptFile.close();
-                    eval(scriptContent);
-                } catch(e) {
-                    alert("Error executing script: " + e.toString());
-                }
-            };
-            btn.helpTip = "Click to execute: " + title;
+            createGridItem(currentRow, files[i], files);
         }
         
         scriptsGridGroup.layout.layout(true);
@@ -2498,28 +2561,33 @@
              dialog.layout.layout(true);
         }
     }
-    
-    refreshScriptsGrid();
 
-    addScriptBtn.onClick = function() {
-       var addWin = new Window("palette", "Add New Script", undefined, {resizeable: true});
+    function openScriptEditor(targetFileToEdit) {
+       var winTitle = targetFileToEdit ? "Edit Script" : "Add New Script";
+       var addWin = new Window("palette", winTitle, undefined, {resizeable: true});
        addWin.orientation = "column";
        addWin.alignChildren = ["left", "top"];
        addWin.spacing = 10;
        
        var titleGroup = addWin.add("group");
        titleGroup.add("statictext", undefined, "Title:");
-       var titleInput = titleGroup.add("edittext", undefined, "My New Script");
+       var titleInput = titleGroup.add("edittext", undefined, targetFileToEdit ? decodeURI(targetFileToEdit.name).replace(".js", "") : "My New Script");
        titleInput.characters = 20;
 
        addWin.add("statictext", undefined, "Script Code:");
-       var codeInput = addWin.add("edittext", undefined, "", {multiline: true, scrollable: true});
+       var contentInitial = "";
+       if (targetFileToEdit && targetFileToEdit.exists) {
+           targetFileToEdit.open("r");
+           contentInitial = targetFileToEdit.read();
+           targetFileToEdit.close();
+       }
+       var codeInput = addWin.add("edittext", undefined, contentInitial, {multiline: true, scrollable: true});
        codeInput.size = [300, 200];
        
        var btnGroup = addWin.add("group");
        btnGroup.orientation = "row";
        btnGroup.alignChildren = ["center", "center"];
-       var btnAdd = btnGroup.add("button", undefined, "Add");
+       var btnAdd = btnGroup.add("button", undefined, targetFileToEdit ? "Save Updates" : "Add");
        var btnCancel = btnGroup.add("button", undefined, "Cancel");
        
        btnCancel.onClick = function() { addWin.close(); };
@@ -2531,12 +2599,29 @@
             var scriptsFolder = new Folder(Folder.userData.fsName + "/RainvicToolsScripts");
             if (!scriptsFolder.exists) scriptsFolder.create();
             
-            // Basic sanitization for file name
-            var safeName = scriptName.split("/").join("").split("\\\\").join("").split(":").join("").split("*").join("").split("?").join("").split("\\"").join("").split("<").join("").split(">").join("").split("|").join("");
+            var safeName = scriptName.replace(new RegExp('[/:*?\\"<>|\\\\]', 'g'), '');
             var newFile = new File(scriptsFolder.fsName + "/" + safeName + ".js");
-            if(newFile.exists) {
+            
+            if (targetFileToEdit && decodeURI(targetFileToEdit.name) !== decodeURI(newFile.name)) {
+                if (newFile.exists && !confirm("A script with this title already exists. Overwrite?")) return;
+                targetFileToEdit.remove();
+                
+                var orderMap = readOrderMap(scriptsFolder);
+                for (var o = 0; o < orderMap.length; o++) {
+                    if (orderMap[o] === decodeURI(targetFileToEdit.name)) {
+                        orderMap[o] = decodeURI(newFile.name);
+                    }
+                }
+                var orderStrVals = [];
+                for (var ov = 0; ov < orderMap.length; ov++) orderStrVals.push('"' + orderMap[ov] + '"');
+                var orderFile = new File(scriptsFolder.fsName + "/order.json");
+                orderFile.open("w");
+                orderFile.write("[" + orderStrVals.join(",") + "]");
+                orderFile.close();
+            } else if (!targetFileToEdit && newFile.exists) {
                 if(!confirm("A script with this title already exists. Overwrite?")) return;
             }
+            
             newFile.open("w");
             newFile.write(code);
             newFile.close();
@@ -2547,7 +2632,91 @@
        
        addWin.center();
        addWin.show();
+    }
+
+    addScriptBtn.onClick = function() {
+       openScriptEditor(null);
     };
+
+    function createGridItem(parentRow, fileObj, allFilesArray) {
+       var cell = parentRow.add("group");
+       if (isEditMode) {
+           cell.orientation = "stack";
+       } else {
+           cell.orientation = "column";
+       }
+       cell.margins = 0;
+
+       var title = decodeURI(fileObj.name).replace(".js", "");
+       var btn = cell.add("button", undefined, title);
+       btn.size = [80, 80];
+       
+       if (!isEditMode) {
+           btn.onClick = function() {
+               try {
+                   fileObj.open("r");
+                   var scriptContent = fileObj.read();
+                   fileObj.close();
+                   eval(scriptContent);
+               } catch(e) {
+                   alert("Error executing script: " + e.toString());
+               }
+           };
+           btn.helpTip = "Click to execute: " + title;
+       } else {
+           if (swapSourceFile && decodeURI(swapSourceFile.name) === decodeURI(fileObj.name)) {
+               btn.text = "[Selected]\\n" + title;
+           } else {
+               btn.helpTip = "Click to pick up and swap places.";
+           }
+           
+           btn.onClick = function() {
+               if (swapSourceFile == null) {
+                   swapSourceFile = fileObj;
+                   refreshScriptsGrid();
+               } else {
+                   if (decodeURI(swapSourceFile.name) !== decodeURI(fileObj.name)) {
+                       var idxA = -1; var idxB = -1;
+                       for (var a = 0; a < allFilesArray.length; a++) {
+                           if (decodeURI(allFilesArray[a].name) === decodeURI(swapSourceFile.name)) idxA = a;
+                           if (decodeURI(allFilesArray[a].name) === decodeURI(fileObj.name)) idxB = a;
+                       }
+                       if (idxA > -1 && idxB > -1) {
+                           var temp = allFilesArray[idxA];
+                           allFilesArray[idxA] = allFilesArray[idxB];
+                           allFilesArray[idxB] = temp;
+                           
+                           var scriptsFolder = new Folder(Folder.userData.fsName + "/RainvicToolsScripts");
+                           writeOrderMap(scriptsFolder, allFilesArray);
+                       }
+                   }
+                   swapSourceFile = null;
+                   refreshScriptsGrid();
+               }
+           };
+
+           var editBtn = cell.add("button", undefined, "E");
+           editBtn.size = [20, 20];
+           editBtn.alignment = ["left", "top"];
+           editBtn.helpTip = "Edit Script";
+           editBtn.onClick = function() {
+               openScriptEditor(fileObj);
+           };
+
+           var delBtn = cell.add("button", undefined, "X");
+           delBtn.size = [20, 20];
+           delBtn.alignment = ["right", "top"];
+           delBtn.helpTip = "Delete Script";
+           delBtn.onClick = function() {
+               if (confirm("Are you sure you want to delete '" + title + "'?")) {
+                   fileObj.remove();
+                   refreshScriptsGrid();
+               }
+           };
+       }
+    }
+    
+    refreshScriptsGrid();
 
     dialog.layout.layout(true);
 

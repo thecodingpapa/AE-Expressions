@@ -220,6 +220,76 @@ Now we will combine the main image and its ripped edge, and add shadows for dept
             return;
         }
         
+        // --- NEW: Dynamic Cloud Import Logic ---
+        function importTexturesIfNeeded() {
+            var texturesToEnsure = [
+                {
+                    fileName: "texture for back.jpg",
+                    relativePath: "/My Drive/RainIsHere/Utilt/AE templates/[IMPORTS]/texture for back.jpg"
+                },
+                {
+                    fileName: "texture for top.jpg",
+                    relativePath: "/My Drive/RainIsHere/Utilt/AE templates/[IMPORTS]/texture for top.jpg"
+                }
+            ];
+
+            function isAlreadyInProject(targetName) {
+                for (var i = 1; i <= project.numItems; i++) {
+                    var item = project.item(i);
+                    if (item instanceof FootageItem && item.name === targetName) {
+                        return true; 
+                    }
+                }
+                return false;
+            }
+
+            function findGoogleDriveFile(relativeFilePath) {
+                var cloudRoot = new Folder("~/Library/CloudStorage");
+                if (!cloudRoot.exists) return null;
+                
+                var folders = cloudRoot.getFiles();
+                for (var i = 0; i < folders.length; i++) {
+                    var f = folders[i];
+                    // Look for any mapped Google Drive folder
+                    if (f instanceof Folder && f.name.indexOf("GoogleDrive") !== -1) {
+                        var targetFile = new File(f.fsName + relativeFilePath);
+                        if (targetFile.exists) return targetFile;
+                    }
+                }
+                return null;
+            }
+
+            var missingLocalFiles = [];
+            for (var j = 0; j < texturesToEnsure.length; j++) {
+                var textureContext = texturesToEnsure[j];
+                
+                if (isAlreadyInProject(textureContext.fileName)) {
+                    continue; 
+                }
+
+                var fileOnDisk = findGoogleDriveFile(textureContext.relativePath);
+                if (fileOnDisk !== null) {
+                    try {
+                        project.importFile(new ImportOptions(fileOnDisk));
+                    } catch (err) {
+                        // Silent catch: standard validation below will alert the user if they're still missing
+                    }
+                } else {
+                    missingLocalFiles.push(textureContext.fileName);
+                }
+            }
+            
+            if (missingLocalFiles.length > 0) {
+                alert("Notice:\nThe following textures were NOT found in your Google Drive folder:\n\n- " 
+                    + missingLocalFiles.join("\n- ") 
+                    + "\n\nPlease ensure your Google Drive is running and synced.");
+            }
+        }
+
+        // Run the dynamic import before looking for textures
+        importTexturesIfNeeded();
+        // ----------------------------------------
+        
         // Look for texture images in the project
         for (var i = 1; i <= project.items.length; i++) {
             var item = project.items[i];
